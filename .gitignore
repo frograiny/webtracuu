@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Logs
+*.log
+
+# ChromaDB Data
+nckh_db/
+
+# Frontend
+vnu-frontend/node_modules/
+vnu-frontend/dist/
+vnu-frontend/.vite/

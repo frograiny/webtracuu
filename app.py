@@ -3,8 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, Integer, String, Text, func, JSON
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 import uvicorn
+from contextlib import asynccontextmanager
 import chromadb
 from sentence_transformers import SentenceTransformer
+import logging
 import os
 
 # ==========================================
@@ -19,7 +21,7 @@ import os
 # 6. Chạy server: uvicorn app:app --reload --port 8000
 
 # Thay đổi chuỗi kết nối này bằng thông tin DB thực tế của VNU
-DATABASE_URL = "postgresql://user:password@localhost:5432/vnu_research_db"
+DATABASE_URL = "postgresql://postgres:1203@localhost:5432/vnu_research_db"
 
 engine = create_engine(DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -54,10 +56,32 @@ class ResearchProject(Base):
 # ==========================================
 # 3. KHỞI TẠO FASTAPI
 # ==========================================
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+ai_model = None
+ai_collection = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global ai_model, ai_collection
+    logger.info("Đang khởi tạo Hệ thống AI...")
+    try:
+        ai_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+        db_client = chromadb.PersistentClient(path="./nckh_db")
+        ai_collection = db_client.get_or_create_collection(name="vnu_research_projects")
+        logger.info("Hệ thống AI & ChromaDB sẵn sàng!")
+    except Exception as e:
+        logger.error(f"Lỗi khởi động AI: {str(e)}")
+    
+    yield
+    logger.info("Tắt hệ thống AI...")
+
 app = FastAPI(
     title="VNU Research API",
-    description="API tìm kiếm NCKH cực nhanh sử dụng PostgreSQL Trigram",
-    version="1.0.0"
+    description="API tìm kiếm NCKH cực nhanh sử dụng PostgreSQL Trigram và AI",
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # CORS configuration cho phép Frontend gọi API từ bất kỳ domain nào
@@ -70,17 +94,7 @@ app.add_middleware(
 )
 
 # ==========================================
-# 4. KHỞI TẠO AI MODEL VÀ CHROMADB (SEMANTIC SEARCH)
-# ==========================================
-print("[Loading] Dang tai mo hinh AI hieu Tieng Viet (Lan dau se mat chut thoi gian de tai)...")
-# Sử dụng mô hình đa ngôn ngữ (hỗ trợ Tiếng Việt rất tốt), dung lượng nhẹ (~400MB)
-ai_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-print("[OK] AI Model da san sang!")
-
-# Khởi tạo ChromaDB - Lưu trữ trực tiếp vào thư mục './nckh_db' (Không cần cài đặt Server)
-db_client = chromadb.PersistentClient(path="./nckh_db")
-ai_collection = db_client.get_or_create_collection(name="vnu_research_projects")
-print("[OK] ChromaDB da san sang!")
+# (Đã chuyển khởi tạo vào lifespan event phía trên)
 
 # Dependency để lấy DB Session
 def get_db():
@@ -97,54 +111,45 @@ def sync_projects_to_ai():
     """Lưu tất cả projects từ PostgreSQL vào ChromaDB để tìm kiếm AI"""
     db = SessionLocal()
     try:
-        if ai_collection.count() == 0:
-            print("Đang mã hóa (embedding) dữ liệu đề tài thành các Vector AI...")
+        if not ai_model or not ai_collection:
+            logger.info("Khong the sync vi AI chua san sang")
+            return
             
-            projects = db.query(ResearchProject).all()
+        projects = db.query(ResearchProject).all()
+        if not projects:
+            return
             
-            if not projects:
-                print("[WARNING] Khong co du lieu trong PostgreSQL. Vui long seed du lieu truoc.")
-                return
-
-            ids = []
-            documents = []
-            metadatas = []
-
-            for p in projects:
-                # Gộp Tên đề tài, Tóm tắt và Từ khóa để AI hiểu toàn bộ ngữ cảnh
-                keywords_text = " ".join(p.keywords) if p.keywords else ""
-                text_to_ai = f"Tên đề tài: {p.title}. Lĩnh vực: {p.field}. Nội dung: {p.abstract}. Từ khóa: {keywords_text}"
-                
-                ids.append(p.id)
-                documents.append(text_to_ai)
-                metadatas.append({
-                    "id": p.id,
-                    "title": p.title,
-                    "author": p.author,
-                    "abstract": p.abstract,
-                    "field": p.field,
-                    "target_audience": p.target_audience,
-                    "year": p.year,
-                    "status": p.status,
-                    "keywords": p.keywords or []
-                })
-
-            # Dùng AI Model biến văn bản thành Vector số học
-            embeddings = ai_model.encode(documents).tolist()
-
-            # Lưu tất cả vào ChromaDB
-            ai_collection.add(
-                ids=ids,
-                embeddings=embeddings,
-                documents=documents,
-                metadatas=metadatas
-            )
-            print(f"[OK] Da ma hoa {len(projects)} de tai vao AI Database!")
-        else:
-            print(f"[OK] AI Database da co {ai_collection.count()} de tai, san sang tim kiem.")
+        ids, documents, metadatas = [], [], []
+        for p in projects:
+            text_to_ai = f"Tên đề tài: {p.title}. Tóm tắt: {p.abstract}. Lĩnh vực: {p.field}. Đối tượng: {p.target_audience}. Từ khóa: {', '.join(p.keywords or [])}"
+            ids.append(p.id)
+            documents.append(text_to_ai)
+            metadatas.append({
+                "id": p.id,
+                "title": p.title,
+                "author": p.author,
+                "target_audience": p.target_audience or "",
+                "field": p.field or "",
+                "year": p.year or 0,
+                "status": p.status or "",
+                "abstract": p.abstract or "",
+                "keywords": ", ".join(p.keywords or [])
+            })
+            
+        # Add to Chroma
+        embeddings = ai_model.encode(documents).tolist()
+        ai_collection.add(
+            ids=ids,
+            embeddings=embeddings,
+            documents=documents,
+            metadatas=metadatas
+        )
+        logger.info(f"Da dong bo {len(projects)} de tai vao AI DB")
+    except Exception as e:
+        logger.error(f"Lỗi sync_projects_to_ai: {e}")
     finally:
         db.close()
-
+    
 # Sync dữ liệu khi khởi động
 sync_projects_to_ai()
 
@@ -297,10 +302,10 @@ def ai_search(q: str = Query(..., description="Nhập câu hỏi tự nhiên. VD
     - Input: "cái gì về viết bài để ai có thể học" 
     - Kết quả: Trả về đề tài "Ứng dụng AI cá nhân hóa lộ trình học tập"
     """
-    if not q or q.strip() == "":
+    if not q or q.strip() == "" or not ai_model:
         return {
             "query": q,
-            "message": "Vui lòng nhập câu hỏi",
+            "message": "Vui lòng nhập câu hỏi hoặc hệ thống AI đang khởi động",
             "data": []
         }
 
@@ -334,7 +339,7 @@ def ai_search(q: str = Query(..., description="Nhập câu hỏi tự nhiên. VD
                     "namThucHien": meta["year"],
                     "trangThai": meta["status"],
                     "tomTat": meta["abstract"],
-                    "tuKhoa": meta["keywords"],
+                    "tuKhoa": meta["keywords"].split(", ") if meta.get("keywords") else [],
                     "ai_relevance_score": round((1 - distance) * 100, 2)  # Điểm độ chính xác AI (0-100%)
                 })
 
@@ -387,8 +392,8 @@ def health_check():
     """Kiểm tra trạng thái API"""
     return {
         "status": "ok",
-        "message": "VNU Research API is running",
-        "ai_db_count": ai_collection.count(),
+        "message": "VNU Research API is running (AI Search Enabled)",
+        "ai_db_count": ai_collection.count() if ai_collection else 0,
         "features": ["PostgreSQL Search", "AI Semantic Search", "Filters", "Project Details"]
     }
 
