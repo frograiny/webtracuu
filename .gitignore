@@ -2,8 +2,14 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 venv/
+.venv/
 .env
+
+# IDEs
+.vscode/
+.idea/
 
 # Logs
 *.log
@@ -15,3 +21,4 @@ nckh_db/
 vnu-frontend/node_modules/
 vnu-frontend/dist/
 vnu-frontend/.vite/
+.DS_Store
