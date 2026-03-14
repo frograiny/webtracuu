@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+# chromadb (Tạm vô hiệu hóa cho Docker)
+# sentence-transformers (Tạm vô hiệu hóa cho Docker)

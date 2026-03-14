@@ -4,8 +4,8 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, func, JSON
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 import uvicorn
 from contextlib import asynccontextmanager
-import chromadb
-from sentence_transformers import SentenceTransformer
+# import chromadb
+# from sentence_transformers import SentenceTransformer
 import logging
 import os
 
@@ -20,8 +20,8 @@ import os
 # 5. Seed dữ liệu mẫu (xem cuối file)
 # 6. Chạy server: uvicorn app:app --reload --port 8000
 
-# Thay đổi chuỗi kết nối này bằng thông tin DB thực tế của VNU
-DATABASE_URL = "postgresql://postgres:1203@localhost:5432/vnu_research_db"
+# Hỗ trợ lấy URL từ biến môi trường (dành cho Docker), nếu không có thì chạy localhost
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:1203@localhost:5432/vnu_research_db")
 
 engine = create_engine(DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -67,15 +67,16 @@ async def lifespan(app: FastAPI):
     global ai_model, ai_collection
     logger.info("Đang khởi tạo Hệ thống AI...")
     try:
-        ai_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-        db_client = chromadb.PersistentClient(path="./nckh_db")
-        ai_collection = db_client.get_or_create_collection(name="vnu_research_projects")
-        logger.info("Hệ thống AI & ChromaDB sẵn sàng!")
+        # Tạm tắt tải Model nặng để chạy Docker nhẹ nhàng khớp với nhóm khác
+        # ai_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+        # db_client = chromadb.PersistentClient(path="./nckh_db")
+        # ai_collection = db_client.get_or_create_collection(name="vnu_research_projects")
+        logger.info("Chế độ Docker: Tạm tắt AI, tập trung vào thanh tìm kiếm PostgreSQL!")
     except Exception as e:
         logger.error(f"Lỗi khởi động AI: {str(e)}")
     
     yield
-    logger.info("Tắt hệ thống AI...")
+    logger.info("Tắt ứng dụng...")
 
 app = FastAPI(
     title="VNU Research API",

@@ -2,23 +2,71 @@
 __pycache__/
 *.py[cod]
 *$py.class
-*.pyc
+*.so
+.Python
+env/
 venv/
-.venv/
-.env
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# IDEs
+# Node & Frontend (Vite)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+.vite/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDEs & Editors
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+nckh_db/
 
 # Logs
 *.log
+server_test.log
 
-# ChromaDB Data
-nckh_db/
-
-# Frontend
-vnu-frontend/node_modules/
-vnu-frontend/dist/
-vnu-frontend/.vite/
+# OS
+Thumbs.db
 .DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker
+.dockerignore
+
+# Temporary
+.cache/
+.tmp/
+temp/

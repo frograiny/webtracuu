@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: vnu_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1203
+      POSTGRES_DB: vnu_research_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vnu_backend
+    environment:
+      # Kết nối tới service "db" thay vì localhost
+      - DATABASE_URL=postgresql://postgres:1203@db:5432/vnu_research_db
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount thư mục hiện tại vào để code tự cập nhật khi sửa (Hot Reload)
+      - .:/app
+    depends_on:
+      - db
+    restart: always
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    image: node:20-alpine
+    container_name: vnu_frontend
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    volumes:
+      # Mount toàn bộ UI react vào 
+      - ./vnu-frontend:/app
+      # Lưu cache module nội bộ docker
+      - /app/node_modules
+    environment:
+      # Giúp hot-reload hoạt động tốt trên Docker Windows
+      - CHOKIDAR_USEPOLLING=true
+    # Cài package và Khởi chạy Vite Server (lắng nghe mọi IP)
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
