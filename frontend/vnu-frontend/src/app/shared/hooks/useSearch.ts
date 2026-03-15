@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDebounce } from './useDebounce';
-import { searchProjects } from '../services/searchService';
+import { searchProjects } from '../../core/services/searchService';
 import type { Project, SearchFilters } from '../types';
 
 interface UseSearchOptions {

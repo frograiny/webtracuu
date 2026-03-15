@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { SearchBar } from '../components/Search/SearchBar';
-import { SearchFiltersArea } from '../components/Search/SearchFilters';
-import { ProjectCard } from '../components/ProjectCard';
-import { useSearch } from '../hooks/useSearch';
-import { getFiltersData } from '../services/searchService';
-import { MainLayout } from '../layout/MainLayout';
-import type { SearchFilters } from '../types';
+import { SearchBar } from './features/search/components/SearchBar';
+import { SearchFiltersArea } from './features/search/components/SearchFilters';
+import { ProjectCard } from './shared/components/ProjectCard';
+import { useSearch } from './shared/hooks/useSearch';
+import { getFiltersData } from './core/services/searchService';
+import { MainLayout } from './layouts/MainLayout';
+import type { SearchFilters } from './shared/types';
 import './App.css';
 
 function App() {

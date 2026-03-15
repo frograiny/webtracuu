@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { Search, Loader2, X } from 'lucide-react';
-import type { SearchFilters } from '../../types';
+import type { SearchFilters } from '../../../shared/types';
 
 interface SearchBarProps {
     query: string;

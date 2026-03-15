@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import type { SearchFilters } from '../../types';
+import type { SearchFilters } from '../../../shared/types';
 
 interface SearchFiltersProps {
     filters: SearchFilters;

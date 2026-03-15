@@ -1,5 +1,5 @@
 import axiosInstance from './httpClient';
-import type { Project, SearchFilters } from '../types';
+import type { Project, SearchFilters } from '../../shared/types';
 
 interface SearchParams {
     q: string;

@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { FileText, Users, Calendar, Target, Tag, ChevronRight } from 'lucide-react';
-import type { Project } from '../../types';
+import type { Project } from '../types';
 
 interface ProjectCardProps {
     project: Project;
