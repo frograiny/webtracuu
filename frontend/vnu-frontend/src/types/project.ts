@@ -20,6 +20,8 @@ export interface SearchFilters {
     year?: number | string;
     status?: string;
     keywords?: string[];
+    documentType?: string;
+    implementationYear?: number | string;
 }
 
 export interface SearchResponse {

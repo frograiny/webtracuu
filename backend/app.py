@@ -42,6 +42,8 @@ class ResearchProject(Base):
     status = Column(String)
     abstract = Column(Text)
     keywords = Column(JSON, default=[])  # Từ khóa/Tags
+    document_type = Column(String, nullable=True)
+    implementation_year = Column(Integer, nullable=True)
 
     """
     LƯU Ý QUAN TRỌNG TRÊN DATABASE (Chạy script SQL này trực tiếp trên PostgreSQL):
@@ -160,6 +162,7 @@ sync_projects_to_ai()
 @app.get("/api/v1/projects/search")
 def search_projects(
     q: str = Query("", description="Từ khóa tìm kiếm (tên đề tài, tác giả...)"),
+    type: str = Query("Tất cả", description="Lọc theo loại tài liệu"),
     field: str = Query("Tất cả", description="Lọc theo lĩnh vực"),
     target: str = Query("Tất cả", description="Lọc theo đối tượng (GV/HS)"),
     year: str = Query("Tất cả", description="Lọc theo năm"),
@@ -196,6 +199,9 @@ def search_projects(
         query = query.order_by(ResearchProject.year.desc())
 
     # 2. LỌC THEO CÁC TIÊU CHÍ KHÁC (Chính xác tuyệt đối)
+    if type != "Tất cả":
+        query = query.filter(ResearchProject.document_type == type)
+        
     if field != "Tất cả":
         query = query.filter(ResearchProject.field == field)
     
@@ -224,7 +230,9 @@ def search_projects(
                     "namThucHien": item.year,
                     "trangThai": item.status,
                     "tomTat": item.abstract,
-                    "tuKhoa": item.keywords or []
+                    "tuKhoa": item.keywords or [],
+                    "loaiTaiLieu": item.document_type,
+                    "namTrienKhai": item.implementation_year
                 } for item in results
             ]
         }
@@ -420,7 +428,9 @@ def seed_data(db: Session = Depends(get_db)):
             year=2023,
             status="Đã nghiệm thu",
             abstract="Nghiên cứu ứng dụng các thuật toán học máy để phân tích kết quả học tập của học sinh, từ đó tự động đề xuất bài tập và tài liệu phù hợp với năng lực từng cá nhân.",
-            keywords=["AI", "Giáo dục", "Cá nhân hóa"]
+            keywords=["AI", "Giáo dục", "Cá nhân hóa"],
+            document_type="Đề tài NCKH",
+            implementation_year=2023
         ),
         ResearchProject(
             id="NCKH-2023-002",
@@ -431,7 +441,9 @@ def seed_data(db: Session = Depends(get_db)):
             year=2023,
             status="Đã nghiệm thu",
             abstract="Đề tài tập trung vào việc thiết kế và tổ chức các chuỗi sự kiện, câu lạc bộ bảo vệ môi trường.",
-            keywords=["Môi trường", "Ngoại khóa", "Ý thức"]
+            keywords=["Môi trường", "Ngoại khóa", "Ý thức"],
+            document_type="Luận văn Thạc sĩ",
+            implementation_year=2022
         ),
         ResearchProject(
             id="NCKH-2024-001",
@@ -442,7 +454,9 @@ def seed_data(db: Session = Depends(get_db)):
             year=2024,
             status="Đang thực hiện",
             abstract="Dự án nghiên cứu quy trình xử lý vỏ trấu phế phẩm nông nghiệp thành các sản phẩm.",
-            keywords=["Vật liệu sinh học", "Vỏ trấu", "Bảo vệ môi trường"]
+            keywords=["Vật liệu sinh học", "Vỏ trấu", "Bảo vệ môi trường"],
+            document_type="Khóa luận Tốt nghiệp",
+            implementation_year=2024
         ),
         ResearchProject(
             id="NCKH-2022-005",
@@ -453,7 +467,9 @@ def seed_data(db: Session = Depends(get_db)):
             year=2022,
             status="Đã nghiệm thu",
             abstract="Hệ thống sử dụng cảm biến độ ẩm đất và ánh sáng để điều khiển máy bơm nước tự động.",
-            keywords=["IoT", "Năng lượng mặt trời", "Tự động hóa"]
+            keywords=["IoT", "Năng lượng mặt trời", "Tự động hóa"],
+            document_type="Đề tài NCKH",
+            implementation_year=2021
         ),
     ]
 

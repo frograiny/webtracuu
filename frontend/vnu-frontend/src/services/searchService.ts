@@ -6,6 +6,7 @@ interface SearchParams {
     field?: string;
     target?: string;
     year?: number | string;
+    type?: string;
     limit?: number;
     offset?: number;
 }
@@ -26,6 +27,9 @@ export async function searchProjects(
         if (filters?.field && filters.field !== "Tất cả") params.field = filters.field;
         if (filters?.targetAudience && filters.targetAudience !== "Tất cả") params.target = filters.targetAudience;
         if (filters?.year && filters.year !== "Tất cả") params.year = filters.year;
+        
+        // Thêm mapping cho các trường mới
+        if (filters?.documentType && filters.documentType !== "Tất cả") params.type = filters.documentType;
 
         const response = await axiosInstance.get(
             `/projects/search`,
