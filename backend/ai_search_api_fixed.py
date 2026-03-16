@@ -3,11 +3,12 @@
 # __import__('pysqlite3')
 # sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
-from fastapi import FastAPI, Query
+from typing import Any
+from fastapi import FastAPI, Query  # type: ignore
 from contextlib import asynccontextmanager
-import chromadb
-from sentence_transformers import SentenceTransformer
-import uvicorn
+import chromadb  # type: ignore
+from sentence_transformers import SentenceTransformer  # type: ignore
+import uvicorn  # type: ignore
 import logging
 
 # Cấu hình log để dễ theo dõi lỗi
@@ -15,8 +16,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Biến toàn cục để lưu Model và Collection
-ai_model = None
-collection = None
+ai_model: Any = None
+collection: Any = None
 
 # Dữ liệu mẫu
 mock_projects = [
@@ -70,8 +71,8 @@ async def lifespan(app: FastAPI):
                 documents.append(text_to_ai)
                 metadatas.append(p)
 
-            embeddings = ai_model.encode(documents).tolist()
-            collection.add(
+            embeddings = ai_model.encode(documents).tolist()  # type: ignore
+            collection.add(  # type: ignore
                 ids=ids,
                 embeddings=embeddings,
                 documents=documents,
@@ -103,10 +104,10 @@ def ai_search(q: str = Query(..., description="Nhập câu hỏi tự nhiên")):
 
     try:
         # Biến câu hỏi thành Vector
-        query_vector = ai_model.encode([q]).tolist()
+        query_vector = ai_model.encode([q]).tolist()  # type: ignore
 
         # Tìm kiếm 3 kết quả giống nhất
-        results = collection.query(
+        results = collection.query(  # type: ignore
             query_embeddings=query_vector,
             n_results=3
         )

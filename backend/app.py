@@ -1,8 +1,9 @@
-from fastapi import FastAPI, Depends, Query
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine, Column, Integer, String, Text, func, JSON
-from sqlalchemy.orm import declarative_base, sessionmaker, Session
-import uvicorn
+from typing import Any
+from fastapi import FastAPI, Depends, Query  # type: ignore
+from fastapi.middleware.cors import CORSMiddleware  # type: ignore
+from sqlalchemy import create_engine, Column, Integer, String, Text, func, JSON  # type: ignore
+from sqlalchemy.orm import declarative_base, sessionmaker, Session  # type: ignore
+import uvicorn  # type: ignore
 from contextlib import asynccontextmanager
 # import chromadb
 # from sentence_transformers import SentenceTransformer
@@ -61,8 +62,8 @@ class ResearchProject(Base):
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-ai_model = None
-ai_collection = None
+ai_model: Any = None
+ai_collection: Any = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -140,8 +141,8 @@ def sync_projects_to_ai():
             })
             
         # Add to Chroma
-        embeddings = ai_model.encode(documents).tolist()
-        ai_collection.add(
+        embeddings = ai_model.encode(documents).tolist()  # type: ignore
+        ai_collection.add(  # type: ignore
             ids=ids,
             embeddings=embeddings,
             documents=documents,
@@ -320,11 +321,11 @@ def ai_search(q: str = Query(..., description="Nhập câu hỏi tự nhiên. VD
 
     try:
         # Bước 1: Biến câu hỏi của người dùng thành Vector
-        query_vector = ai_model.encode([q]).tolist()
+        query_vector = ai_model.encode([q]).tolist()  # type: ignore
 
         # Bước 2: Tìm kiếm trong ChromaDB những Vector gần giống nhất
         # N_results=5 nghĩa là trả về 5 kết quả phù hợp nhất
-        results = ai_collection.query(
+        results = ai_collection.query(  # type: ignore
             query_embeddings=query_vector,
             n_results=5
         )
@@ -376,9 +377,9 @@ def sync_ai_db():
     """
     try:
         # Xóa tất cả dữ liệu cũ từ ChromaDB
-        all_ids = ai_collection.get(include=[], limit=10000)["ids"]
+        all_ids = ai_collection.get(include=[], limit=10000)["ids"]  # type: ignore
         if all_ids:
-            ai_collection.delete(ids=all_ids)
+            ai_collection.delete(ids=all_ids)  # type: ignore
         
         # Sync lại toàn bộ dữ liệu
         sync_projects_to_ai()
@@ -419,7 +420,7 @@ def seed_data(db: Session = Depends(get_db)):
     db.query(ResearchProject).delete()
 
     sample_data = [
-        ResearchProject(
+        ResearchProject(  # type: ignore
             id="NCKH-2023-001",
             title="Ứng dụng trí tuệ nhân tạo trong việc cá nhân hóa lộ trình học tập",
             author="Nguyễn Văn An",
@@ -432,7 +433,7 @@ def seed_data(db: Session = Depends(get_db)):
             document_type="Đề tài NCKH",
             implementation_year=2023
         ),
-        ResearchProject(
+        ResearchProject(  # type: ignore
             id="NCKH-2023-002",
             title="Giải pháp nâng cao ý thức bảo vệ môi trường cho học sinh THPT qua các hoạt động ngoại khóa",
             author="Trần Thị Bích",
@@ -445,7 +446,7 @@ def seed_data(db: Session = Depends(get_db)):
             document_type="Luận văn Thạc sĩ",
             implementation_year=2022
         ),
-        ResearchProject(
+        ResearchProject(  # type: ignore
             id="NCKH-2024-001",
             title="Chế tạo vật liệu sinh học thay thế nhựa dùng một lần từ vỏ trấu",
             author="Lê Hoàng Cường",
@@ -458,7 +459,7 @@ def seed_data(db: Session = Depends(get_db)):
             document_type="Khóa luận Tốt nghiệp",
             implementation_year=2024
         ),
-        ResearchProject(
+        ResearchProject(  # type: ignore
             id="NCKH-2022-005",
             title="Thiết kế hệ thống tưới tiêu tự động sử dụng năng lượng mặt trời cho vườn trường",
             author="Phạm Minh Đức",
