@@ -325,6 +325,7 @@ export default function App() {
               >
                 🔍 Tìm kiếm bình thường
               </button>
+              {/* Tạm thời ẩn AI
               <button 
                 onClick={() => setSearchMode('ai')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all ${
@@ -335,6 +336,7 @@ export default function App() {
               >
                 🤖 AI Semantic Search
               </button>
+              */}
             </div>
             
             <div className="relative">

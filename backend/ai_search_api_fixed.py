@@ -53,7 +53,7 @@ async def lifespan(app: FastAPI):
     try:
         # Tải mô hình
         logger.info("Đang tải model ngôn ngữ (có thể mất 1-2 phút lần đầu)...")
-        ai_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+        # ai_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
         
         # Khởi tạo Database
         logger.info("Khởi tạo Vector Database (ChromaDB)...")
