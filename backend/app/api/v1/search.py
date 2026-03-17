@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Query # type: ignore
 from sqlalchemy.orm import Session # type: ignore
 from sqlalchemy import func # type: ignore
-from app.db.session import get_db
-from app.models.project import ResearchProject
+from app.db.session import get_db # type: ignore
+from app.models.project import ResearchProject # type: ignore
 
 router = APIRouter()
 
