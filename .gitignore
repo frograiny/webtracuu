@@ -53,6 +53,7 @@ nckh_db/
 # Logs
 *.log
 server_test.log
+**/vite_log.txt
 
 # OS
 Thumbs.db
