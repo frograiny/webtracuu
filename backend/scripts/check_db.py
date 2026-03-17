@@ -1,5 +1,11 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import psycopg2  # type: ignore
-from app import DATABASE_URL  # type: ignore
+from app.core.config import settings
+
+DATABASE_URL = settings.DATABASE_URL
 
 print("Connecting to:", DATABASE_URL)
 try:
