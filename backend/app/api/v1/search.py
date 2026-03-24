@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query # type: ignore
 from sqlalchemy.orm import Session # type: ignore
-from sqlalchemy import func # type: ignore
+from sqlalchemy import func, or_ # type: ignore
+
 from app.db.session import get_db # type: ignore
 from app.models.project import ResearchProject # type: ignore
 
@@ -20,18 +21,20 @@ def search_projects(
     query = db.query(ResearchProject)
 
     if q:
-        similarity_threshold = 0.2
-        search_filter = (
-            (func.similarity(ResearchProject.title, q) > similarity_threshold) |
-            (func.similarity(ResearchProject.author, q) > similarity_threshold)
+        # Cải tiến lần 3: Sử dụng Full-Text Search (FTS) nội tại của PostgreSQL
+        # Dùng plainto_tsquery để hỗ trợ gõ nhiều từ khóa mà không cần pg_trgm
+        search_filter = or_(
+            func.to_tsvector('simple', ResearchProject.title).op('@@')(func.plainto_tsquery('simple', q)),
+            func.to_tsvector('simple', ResearchProject.author).op('@@')(func.plainto_tsquery('simple', q))
         )
         query = query.filter(search_filter)
-        query = query.order_by(
-            func.greatest(
-                func.similarity(ResearchProject.title, q),
-                func.similarity(ResearchProject.author, q)
-            ).desc()
+        
+        # Bổ sung thuật toán tính Rank để sắp xếp kết quả chuẩn xác (Từ khóa khớp nhiều sẽ lên đầu)
+        rank_score = func.ts_rank(
+            func.to_tsvector('simple', ResearchProject.title), 
+            func.plainto_tsquery('simple', q)
         )
+        query = query.order_by(rank_score.desc(), ResearchProject.year.desc())
     else:
         query = query.order_by(ResearchProject.year.desc())
 
