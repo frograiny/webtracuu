@@ -27,20 +27,20 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
 
             <div className="grid grid-cols-2 gap-y-3 gap-x-4 mb-6 text-sm">
                 <div className="flex items-center text-gray-500">
-                    <Users className="w-4 h-4 mr-2" />
+                    <Users className="w-4 h-4 mr-2 shrink-0" />
                     <span className="truncate" title={project.author}>{project.author}</span>
                 </div>
                 <div className="flex items-center text-gray-500">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    <span>Năm {project.year}</span>
+                    <Calendar className="w-4 h-4 mr-2 shrink-0" />
+                    <span className="truncate">Năm {project.year}</span>
                 </div>
                 <div className="flex items-center text-gray-500">
-                    <Target className="w-4 h-4 mr-2" />
-                    <span className="truncate">{project.targetAudience}</span>
+                    <Target className="w-4 h-4 mr-2 shrink-0" />
+                    <span className="truncate" title={project.targetAudience}>{project.targetAudience}</span>
                 </div>
                 <div className="flex items-center text-gray-500">
-                    <FileText className="w-4 h-4 mr-2" />
-                    <span className="truncate">{project.field}</span>
+                    <FileText className="w-4 h-4 mr-2 shrink-0" />
+                    <span className="truncate" title={project.field}>{project.field}</span>
                 </div>
             </div>
 
@@ -58,8 +58,8 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
                         </span>
                     )}
                 </div>
-                <button className="text-blue-600 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors">
-                    <ChevronRight className="w-5 h-5" />
+                <button className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 hover:underline px-3 py-1.5 rounded-full hover:bg-blue-50 transition-colors shrink-0">
+                    Xem chi tiết <ChevronRight className="w-4 h-4" />
                 </button>
             </div>
         </div>

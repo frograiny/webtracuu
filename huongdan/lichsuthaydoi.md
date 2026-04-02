@@ -1,8 +1,36 @@
+--- CẬP NHẬT MỚI NHẤT ---
+
+commit (chưa commit)
+Date:   Wed Apr 2 20:45:00 2026 +0700
+
+    fix: Hỗ trợ tìm kiếm tiếng Việt không dấu (unaccent search)
+
+    Vấn đề: Khi gõ tiếng Việt không dấu (vd: "vat lieu", "nguyen van an"),
+    hệ thống FTS không trả về kết quả vì to_tsvector('simple') chỉ so khớp
+    chính xác ký tự — 'vat' ≠ 'vật'.
+
+    Giải pháp: Thêm cơ chế tìm kiếm 2 tầng:
+    - Tầng 1: Giữ nguyên FTS cho trường hợp gõ đúng dấu (nhanh, có ranking)
+    - Tầng 2 (fallback): Khi FTS không có kết quả, dùng ILIKE + translate()
+      để bỏ dấu tiếng Việt ở CẢ phía SQL (translate()) và Python (unicodedata)
+      rồi so khớp. KHÔNG cần cài Extension, KHÔNG cần thay đổi schema DB.
+
+    Kỹ thuật dùng:
+    - Python: unicodedata.normalize('NFD') + lọc combining characters
+    - SQL: PostgreSQL translate() với bảng mapping 89 ký tự VN có dấu → không dấu
+    - Logic AND: tất cả từ khóa đều phải khớp để tránh kết quả nhiễu
+
+ backend/app/api/v1/search.py | 94 +++++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 86 insertions(+), 8 deletions(-)
+
+---
+
 commit 6b0b7714e2b3eaec84320d66aff2c717de2da42f
 Author: TruongAn <truongan1203.hp@gmail.com>
 Date:   Tue Mar 17 19:38:45 2026 +0700
 
     chore: ignore vite_log.txt
+
 
  .gitignore | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)

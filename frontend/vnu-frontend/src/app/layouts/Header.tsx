@@ -1,4 +1,5 @@
 import React from 'react';
+import husLogo from '../../assets/logohuss.png';
 
 export const Header = () => {
     return (
@@ -6,8 +7,8 @@ export const Header = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-24">
                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-[#0a3875] flex items-center justify-center">
-                            <span className="text-white font-bold text-2xl tracking-tighter shadow-sm">HUS</span>
+                        <div className="w-16 h-16 flex items-center justify-center">
+                            <img src={husLogo} alt="HUS Logo" className="w-full h-full object-contain" />
                         </div>
                         <div>
                             <h1 className="text-xl font-bold text-[#0a3875] leading-tight drop-shadow-sm">

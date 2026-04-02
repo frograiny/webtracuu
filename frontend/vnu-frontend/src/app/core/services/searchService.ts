@@ -1,5 +1,6 @@
 import axiosInstance from './httpClient';
 import type { Project, SearchFilters } from '../../shared/types';
+import { normalizeAudienceLabel } from '../../shared/utils/audience';
 
 interface SearchParams {
     q: string;
@@ -15,7 +16,7 @@ export async function searchProjects(
     query: string,
     filters?: SearchFilters,
     pagination?: { limit?: number; offset?: number }
-): Promise<Project[]> {
+): Promise<{ results: Project[]; total: number }> {
     try {
         const params: SearchParams = {
             q: query,
@@ -23,36 +24,36 @@ export async function searchProjects(
             offset: pagination?.offset || 0,
         };
 
-        // Ánh xạ lại tên tham số filter cho đúng với FastAPI
-        if (filters?.field && filters.field !== "Tất cả") params.field = filters.field;
-        if (filters?.targetAudience && filters.targetAudience !== "Tất cả") params.target = filters.targetAudience;
-        if (filters?.year && filters.year !== "Tất cả") params.year = filters.year;
-        
-        // Thêm mapping cho các trường mới
-        if (filters?.documentType && filters.documentType !== "Tất cả") params.type = filters.documentType;
+        if (filters?.field && filters.field !== 'Tất cả') params.field = filters.field;
+        if (filters?.targetAudience && filters.targetAudience !== 'Tất cả') {
+            params.target = normalizeAudienceLabel(filters.targetAudience);
+        }
+        if (filters?.year && filters.year !== 'Tất cả') params.year = filters.year;
+        if (filters?.documentType && filters.documentType !== 'Tất cả') params.type = filters.documentType;
 
-        const response = await axiosInstance.get(
-            `/projects/search`,
-            { params }
-        );
+        const response = await axiosInstance.get('/projects/search', { params });
 
-        // FastAPI trả về mảng ở định dạng tiếng Việt (tenDeTai, chuNhiem...), ta map lại
         if (response.data.status === 'success') {
             const rawItems = response.data.data.items;
-            return rawItems.map((item: any) => ({
-                id: item.id,
-                title: item.tenDeTai,
-                author: item.chuNhiem,
-                targetAudience: item.doiTuong,
-                field: item.linhVuc,
-                year: item.namThucHien,
-                status: item.trangThai,
-                abstract: item.tomTat,
-                keywords: item.tuKhoa,
-            }));
+            const total = response.data.data.total;
+
+            return {
+                results: rawItems.map((item: any) => ({
+                    id: item.id,
+                    title: item.tenDeTai,
+                    author: item.chuNhiem,
+                    targetAudience: normalizeAudienceLabel(item.doiTuong),
+                    field: item.linhVuc,
+                    year: item.namThucHien,
+                    status: item.trangThai,
+                    abstract: item.tomTat,
+                    keywords: item.tuKhoa,
+                })),
+                total,
+            };
         }
 
-        return [];
+        return { results: [], total: 0 };
     } catch (error) {
         console.error('Search error:', error);
         throw new Error('Failed to fetch search results');
@@ -61,9 +62,14 @@ export async function searchProjects(
 
 export async function getFiltersData(): Promise<any> {
     try {
-        const response = await axiosInstance.get(`/filters`);
+        const response = await axiosInstance.get('/filters');
         if (response.data.status === 'success') {
-            return response.data.data;
+            return {
+                ...response.data.data,
+                audiences: (response.data.data.audiences ?? []).map((audience: string) =>
+                    normalizeAudienceLabel(audience)
+                ),
+            };
         }
         return { fields: [], years: [], audiences: [] };
     } catch (error) {

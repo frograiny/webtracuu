@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="VNU Research API",
-    description="API tìm kiếm NCKH cực nhanh sử dụng PostgreSQL Trigram",
+    description="API ",
     version="1.0.0",
 )
 

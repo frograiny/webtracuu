@@ -19,18 +19,27 @@ export const MainLayout: FC<LayoutProps> = ({ children }) => {
                     <div className="bg-white p-5 border border-gray-200 shadow-sm mb-6 border-t-[3px] border-t-red-700">
                         <h3 className="font-bold text-[1.05rem] mb-4 text-[#0a3875] uppercase border-b pb-2 border-gray-100 italic">Bảng tin khoa học</h3>
                         <ul className="space-y-3.5 text-sm text-gray-700">
-                            <li className="hover:text-red-700 cursor-pointer transition-colors border-b border-gray-50 pb-2">Thông báo nộp đề cương Quỹ NAFOSTED đợt 2/2026.</li>
-                            <li className="hover:text-red-700 cursor-pointer transition-colors border-b border-gray-50 pb-2">Lễ trao giải Sinh viên NCKH cấp ĐHQGHN năm học 2025-2026.</li>
-                            <li className="hover:text-red-700 cursor-pointer transition-colors">Hướng dẫn thể thức báo cáo nghiệm thu đề tài cấp cơ sở.</li>
+                            <li className="hover:text-red-700 cursor-pointer transition-colors border-b border-gray-50 pb-2">
+                                <div className="leading-snug">Thông báo nộp đề cương Quỹ NAFOSTED đợt 2/2026.</div>
+                                <div className="text-gray-400 text-[0.7rem] mt-1.5">01/04/2026</div>
+                            </li>
+                            <li className="hover:text-red-700 cursor-pointer transition-colors border-b border-gray-50 pb-2">
+                                <div className="leading-snug">Lễ trao giải Sinh viên NCKH cấp ĐHQGHN năm học 2025-2026.</div>
+                                <div className="text-gray-400 text-[0.7rem] mt-1.5">28/03/2026</div>
+                            </li>
+                            <li className="hover:text-red-700 cursor-pointer transition-colors">
+                                <div className="leading-snug">Hướng dẫn thể thức báo cáo nghiệm thu đề tài cấp cơ sở.</div>
+                                <div className="text-gray-400 text-[0.7rem] mt-1.5">15/03/2026</div>
+                            </li>
                         </ul>
                     </div>
                     <div className="bg-white p-5 border border-gray-200 shadow-sm border-t-[3px] border-t-[#0a3875]">
                         <h3 className="font-bold text-[1.05rem] mb-4 text-[#0a3875] uppercase border-b pb-2 border-gray-100 italic">Liên kết nhanh</h3>
                         <ul className="space-y-3 text-sm text-gray-700">
-                            <li className="hover:text-red-700 cursor-pointer transition-colors flex items-center gap-2"><span className="text-[#0a3875]">»</span> Tạp chí Khoa học ĐHQGHN</li>
-                            <li className="hover:text-red-700 cursor-pointer transition-colors flex items-center gap-2"><span className="text-[#0a3875]">»</span> Cổng thông tin Cục SHTT</li>
-                            <li className="hover:text-red-700 cursor-pointer transition-colors flex items-center gap-2"><span className="text-[#0a3875]">»</span> TT Thư viện và Tri thức số</li>
-                            <li className="hover:text-red-700 cursor-pointer transition-colors flex items-center gap-2"><span className="text-[#0a3875]">»</span> Quản lý đề tài VNU</li>
+                            <li className="hover:text-blue-800 hover:underline cursor-pointer transition-colors flex items-center gap-2"><span className="text-[#0a3875]">»</span> Tạp chí Khoa học ĐHQGHN</li>
+                            <li className="hover:text-blue-800 hover:underline cursor-pointer transition-colors flex items-center gap-2"><span className="text-[#0a3875]">»</span> Cổng thông tin Cục SHTT</li>
+                            <li className="hover:text-blue-800 hover:underline cursor-pointer transition-colors flex items-center gap-2"><span className="text-[#0a3875]">»</span> TT Thư viện và Tri thức số</li>
+                            <li className="hover:text-blue-800 hover:underline cursor-pointer transition-colors flex items-center gap-2"><span className="text-[#0a3875]">»</span> Quản lý đề tài VNU</li>
                         </ul>
                     </div>
                 </aside>

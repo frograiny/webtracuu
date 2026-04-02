@@ -2,7 +2,7 @@ export interface Project {
     id: string;
     title: string;
     author: string;
-    targetAudience: 'Giáo viên' | 'Học sinh' | string;
+    targetAudience: 'Giảng viên' | 'Sinh viên' | string;
     field: string;
     year: number;
     status: 'Đang thực hiện' | 'Đã nghiệm thu' | 'Hoàn thành' | string;
@@ -10,7 +10,6 @@ export interface Project {
     keywords: string[];
     createdAt?: string;
     updatedAt?: string;
-    // Dành cho AI Search
     ai_relevance_score?: number;
 }
 
