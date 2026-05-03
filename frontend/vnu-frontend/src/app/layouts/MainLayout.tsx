@@ -1,21 +1,25 @@
 import React, { FC, ReactNode } from 'react';
 import { Topbar } from './Topbar';
 import { Header } from './Header';
+import { LoginPanel } from '../features/auth/components/LoginPanel';
 
 interface LayoutProps {
     children: ReactNode;
+    showLoginPanel?: boolean;
 }
 
-export const MainLayout: FC<LayoutProps> = ({ children }) => {
+export const MainLayout: FC<LayoutProps> = ({ children, showLoginPanel = true }) => {
     return (
         <div className="min-h-screen bg-gray-50/50 font-sans text-gray-800">
             <Topbar />
             <Header />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-8">
-                <main className="w-full lg:w-3/4">
+                <main className={showLoginPanel ? "w-full lg:w-3/4" : "w-full"}>
                     {children}
                 </main>
+                {showLoginPanel && (
                 <aside className="w-full lg:w-1/4">
+                    <LoginPanel />
                     <div className="bg-white p-5 border border-gray-200 shadow-sm mb-6 border-t-[3px] border-t-red-700">
                         <h3 className="font-bold text-[1.05rem] mb-4 text-[#0a3875] uppercase border-b pb-2 border-gray-100 italic">Bảng tin khoa học</h3>
                         <ul className="space-y-3.5 text-sm text-gray-700">
@@ -43,6 +47,7 @@ export const MainLayout: FC<LayoutProps> = ({ children }) => {
                         </ul>
                     </div>
                 </aside>
+                )}
             </div>
             
             <footer className="bg-gray-800 text-gray-400 py-10 mt-8 border-t border-gray-700">

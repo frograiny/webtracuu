@@ -11,6 +11,9 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: "postgresql://postgres:1203@postgres:5432/vnu_research_db"
+      SECRET_KEY: "change-this-secret-before-deploy"
+      ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+      BACKEND_CORS_ORIGINS: '["http://localhost:5173","http://127.0.0.1:5173"]'
     depends_on:
       - postgres
     volumes:

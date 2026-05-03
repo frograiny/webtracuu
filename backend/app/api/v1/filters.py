@@ -3,13 +3,15 @@ from sqlalchemy.orm import Session  # type: ignore
 
 from app.db.session import get_db  # type: ignore
 from app.models.project import ResearchProject  # type: ignore
+from app.schemas.project import FilterData, FilterResponse
 from app.utils.audience import normalize_target_audience_options
 
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("/", response_model=FilterResponse)
 def get_filters(db: Session = Depends(get_db)):
+    """Trả về danh sách các giá trị dùng cho bộ lọc trên frontend."""
     fields = db.query(ResearchProject.field).distinct().order_by(ResearchProject.field).all()
     field_list = ["Tất cả"] + [f[0] for f in fields if f[0]]
 
@@ -19,11 +21,14 @@ def get_filters(db: Session = Depends(get_db)):
     audiences = db.query(ResearchProject.target_audience).distinct().all()
     audience_list = normalize_target_audience_options(a[0] for a in audiences)
 
-    return {
-        "status": "success",
-        "data": {
-            "fields": field_list,
-            "years": year_list,
-            "audiences": audience_list,
-        },
-    }
+    doc_types = db.query(ResearchProject.document_type).distinct().order_by(ResearchProject.document_type).all()
+    doc_type_list = ["Tất cả"] + [d[0] for d in doc_types if d[0]]
+
+    return FilterResponse(
+        data=FilterData(
+            fields=field_list,
+            years=year_list,
+            audiences=audience_list,
+            documentTypes=doc_type_list,
+        )
+    )

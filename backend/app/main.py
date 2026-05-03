@@ -1,6 +1,7 @@
 from fastapi import FastAPI # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
-from app.api.v1 import search, filters
+from app.api.v1 import auth, filters, search
+from app.core.config import settings
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -14,12 +15,13 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(search.router, prefix="/api/v1/projects", tags=["projects"])
 app.include_router(filters.router, prefix="/api/v1/filters", tags=["filters"])
 
@@ -28,5 +30,5 @@ def health_check():
     return {
         "status": "ok",
         "message": "VNU Research API is running (Refactored Architecture)",
-        "features": ["PostgreSQL Search", "Filters", "Project Details"]
+        "features": ["PostgreSQL Search", "Filters", "Project Details", "JWT Auth"]
     }
