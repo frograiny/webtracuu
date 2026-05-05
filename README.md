@@ -1,195 +1,98 @@
-# 🎓 VNU Research Portal - Project Structure
+# 🎓 VNU Research Portal (Web Trác Cứu NCKH)
 
-Dự án tìm kiếm NCKH của Đại học Quốc gia Hà Nội
+Dự án cổng thông tin và tìm kiếm đề tài Nghiên cứu Khoa học (NCKH) dành cho Đại học Quốc gia Hà Nội. Hệ thống được xây dựng với kiến trúc hiện đại, tối ưu hóa cho tốc độ tìm kiếm và bảo mật.
 
-## 📁 Cấu Trúc Thư Mục
+## ✨ Tính năng nổi bật
 
-```
-d:\nghich\webtruong/
-│
-├── 📂 frontend/                      Frontend Application (React + Vite)
-│   └── vnu-frontend/
-│       ├── src/
-│       │   ├── app/                 Application entry point
-│       │   │   ├── App.tsx
-│       │   │   ├── App.css
-│       │   │   └── main.tsx
-│       │   │
-│       │   ├── layout/              Layout components
-│       │   │   ├── Topbar.tsx       (NEW - to create)
-│       │   │   ├── Header.tsx       (NEW - to create)
-│       │   │   ├── Navigation.tsx   (NEW - to create)
-│       │   │   ├── SectionTitle.tsx (NEW - to create)
-│       │   │   ├── Sidebar.tsx      (NEW - to create)
-│       │   │   └── MainLayout.tsx   (NEW - to create)
-│       │   │
-│       │   ├── components/          Reusable components
-│       │   │   ├── Search/
-│       │   │   │   ├── SearchBar.tsx
-│       │   │   │   └── SearchFilters.tsx
-│       │   │   └── ProjectCard.tsx
-│       │   │
-│       │   ├── features/            Feature-specific components
-│       │   │   ├── ... (for future features)
-│       │   │   └── ...
-│       │   │
-│       │   ├── hooks/               Custom React hooks
-│       │   │   ├── useSearch.ts
-│       │   │   └── useDebounce.ts
-│       │   │
-│       │   ├── services/            API & external services
-│       │   │   ├── httpClient.ts
-│       │   │   └── searchService.ts
-│       │   │
-│       │   ├── types/               TypeScript interfaces
-│       │   │   ├── api.ts
-│       │   │   ├── index.ts
-│       │   │   └── project.ts
-│       │   │
-│       │   ├── config/              Application config
-│       │   │   └── theme.config.ts  (NEW - to create)
-│       │   │
-│       │   ├── utils/               Utility functions
-│       │   │   └── ... (helpers)
-│       │   │
-│       │   ├── styles/              Global styles
-│       │   │   └── index.css
-│       │   │
-│       │   ├── assets/              Images, fonts, etc
-│       │   │   └── ...
-│       │   │
-│       │   └── index.html
-│       │
-│       ├── package.json
-│       ├── vite.config.ts
-│       ├── tsconfig.json
-│       └── Dockerfile
-│
-├── 📂 backend/                       Backend Application (Python/FastAPI)
-│   ├── app.py                       Main FastAPI application
-│   ├── requirements.txt             Python dependencies
-│   ├── test_app.py                  Tests for API
-│   ├── test_fastapi.py              FastAPI tests
-│   ├── ai_search_api_fixed.py       AI search implementation
-│   ├── Dockerfile                   Docker configuration
-│   ├── docker-compose.yml           (moved here)
-│   └── nckh_db/                     Local database
-│
-├── 📂 huongdan/                      Documentation & Guides
-│   ├── QUICK_SUMMARY.md             Quick overview
-│   ├── IMPLEMENTATION_PLAN.md       Implementation checklist
-│   ├── PROJECT_ASSESSMENT.md        Project evaluation
-│   ├── COMPONENT_REFACTORING_PLAN.md Component structure guide
-│   ├── CHANGES_FOR_CONSISTENCY.md   Changes log
-│   └── fe.md                        Frontend description
-│
-├── 📂 venv/                         Python virtual environment (ignore in git)
-│
-├── docker-compose.yml               Docker compose (root level)
-├── .gitignore                       Git ignore rules
-└── README.md                        This file
-```
+### 🔍 Tìm kiếm Hybrid (Hybrid Search)
+- **Thuật toán Token-level Scoring:** Tính điểm độ liên quan dựa trên tiêu đề và tác giả.
+- **Chuẩn hóa tiếng Việt:** Hỗ trợ tìm kiếm cả có dấu và không dấu một cách chính xác.
+- **Hiệu suất cao:** Sử dụng các cột đã được normalized và index trong PostgreSQL.
+
+### 🛡️ Bảo mật & Quản trị
+- **JWT Authentication:** Hệ thống đăng nhập an toàn với Access Token.
+- **Phân quyền (RBAC):** Phân chia rõ ràng vai trò `Admin` (quản lý đề tài, user) và `Viewer` (xem thông tin).
+- **Rate Limiting:** Chống tấn công Brute Force và Spam API (Giới hạn 5 req/min cho login, 30 req/min cho search).
+
+### ⚡ Tối ưu hiệu năng
+- **Caching:** Tích hợp `fastapi-cache2` (InMemoryBackend) giúp phản hồi kết quả tìm kiếm ngay lập tức cho các truy vấn phổ biến.
+- **Pagination:** Toàn bộ các API danh sách (đề tài, người dùng) đều được phân trang để đảm bảo tốc độ khi dữ liệu lớn.
+
+### 📝 Giám sát & Kiểm thử
+- **Structured Logging:** Sử dụng `loguru` để quản lý log chuyên nghiệp, tự động lưu và xoay vòng file log theo ngày.
+- **Automated Testing:** Bộ test hoàn chỉnh với `pytest`, giả lập Database trong bộ nhớ để đảm bảo code luôn chạy đúng.
 
 ---
 
-## 🚀 Quick Start
+## 🛠️ Công nghệ sử dụng
 
-### 1. Backend Setup
+- **Backend:** FastAPI (Python), SQLAlchemy ORM, PostgreSQL.
+- **Frontend:** React, TypeScript, Vite, TailwindCSS.
+- **Infrastructure:** Docker, Docker Compose, SlowAPI, FastAPICache.
+
+---
+
+## 🚀 Hướng dẫn khởi chạy
+
+### Cách 1: Chạy nhanh bằng file Batch (Windows)
+Chỉ cần chạy file sau ở thư mục gốc:
+```bash
+start_project.bat
+```
+File này sẽ tự động khởi động cả Backend (cổng 8000) và Frontend (cổng 5173).
+
+### Cách 2: Chạy thủ công
+
+**1. Backend:**
 ```bash
 cd backend
+python -m venv venv
+..\venv\Scripts\activate
 pip install -r requirements.txt
-python app.py
-# or
-uvicorn app:app --reload --port 8000
+uvicorn app.main:app --reload --port 8000
 ```
 
-### 2. Frontend Setup
+**2. Frontend:**
 ```bash
 cd frontend/vnu-frontend
 npm install
 npm run dev
-# Runs at http://localhost:5173
 ```
 
-### 3. Using Docker Compose (both)
+---
+
+## 🧪 Chạy Kiểm thử (Tests)
+
+Hệ thống sử dụng `pytest` để kiểm tra logic backend:
 ```bash
-docker-compose up -d
-# Backend: http://localhost:8000
-# Frontend: http://localhost:5173
-# API Docs: http://localhost:8000/docs
+cd backend
+..\venv\Scripts\activate
+python -m pytest tests/ -v
 ```
 
 ---
 
-## 📋 Thay Đổi Cấu Trúc (Breaking Changes)
+## 📁 Cấu trúc thư mục chính
 
-### Đường dẫn cũ vs mới:
+```text
+.
+├── backend/
+│   ├── app/                # Mã nguồn chính của API
+│   │   ├── api/            # Các endpoint (v1)
+│   │   ├── core/           # Cấu hình, bảo mật, rate limit
+│   │   ├── models/         # Database models (SQLAlchemy)
+│   │   └── schemas/        # Pydantic models (Validation)
+│   ├── tests/              # Bộ Unit Test (Pytest)
+│   ├── requirements.txt    # Thư viện Python
+│   └── alembic/            # Quản lý migration database
+├── frontend/
+│   └── vnu-frontend/       # Mã nguồn React Application
+├── logs/                   # Thư mục chứa log của hệ thống
+├── start_project.bat       # Script khởi động nhanh
+└── docker-compose.yml      # Cấu hình Docker toàn hệ thống
 ```
-OLD:
-└── app.py                          → NEW: backend/app.py
-└── requirements.txt                → NEW: backend/requirements.txt
-└── Dockerfile                      → NEW: backend/Dockerfile
-└── docker-compose.yml              → NEW: backend/docker-compose.yml
-│                                   → NEW: docker-compose.yml (root)
-└── vnu-frontend/src/App.tsx        → NEW: frontend/vnu-frontend/src/app/App.tsx
-└── vnu-frontend/src/App.css        → NEW: frontend/vnu-frontend/src/app/App.css
-└── vnu-frontend/src/index.css      → NEW: frontend/vnu-frontend/src/styles/index.css
-└── vnu-frontend/src/components/Layout/ → NEW: frontend/vnu-frontend/src/layout/
-└── *.md files                      → NEW: huongdan/*.md
-```
 
 ---
 
-## ⚠️ Files Cần Update Sau Restructure
-
-### Backend Files
-- [ ] `backend/app.py` - Update database path references if needed
-- [ ] Environment variables (Docker): DATABASE_URL paths
-
-### Frontend Files
-- [ ] `frontend/vnu-frontend/vite.config.ts` - Verify paths
-- [ ] `frontend/vnu-frontend/src/app/App.tsx` - Update import paths
-- [ ] `frontend/vnu-frontend/src/main.tsx` - Ensure it imports from new paths
-
-### Git Configuration
-- [ ] Update `.gitignore` to include new structure
-- [ ] Ensure `nckh_db/` is in backend folder & gitignored
-
----
-
-## 📚 Documentation Location
-
-All official documentation has been moved to `huongdan/` directory:
-- `📖 QUICK_SUMMARY.md` - Start here!
-- `📖 IMPLEMENTATION_PLAN.md` - Step-by-step guide
-- `📖 PROJECT_ASSESSMENT.md` - System evaluation
-- `📖 COMPONENT_REFACTORING_PLAN.md` - Component creation guide
-- `📖 CHANGES_FOR_CONSISTENCY.md` - Changes log
-- `📖 fe.md` - Frontend requirements
-
----
-
-## ✅ Benefits of New Structure
-
-1. ✅ **Separation of Concerns** - Backend and Frontend clearly separated
-2. ✅ **Scalability** - Easy to add new features in separate folders
-3. ✅ **Maintainability** - Clear folder hierarchy
-4. ✅ **Consistency** - Matches industry standards (Angular, React patterns)
-5. ✅ **Documentation** - All guides in one place
-6. ✅ **Docker Ready** - Easy orchestration with docker-compose
-
----
-
-## 🔄 Next Steps
-
-1. ✅ **Structure Refactor** - COMPLETED
-2. ⏭️ **Update Import Paths** - Update all relative paths in code
-3. ⏭️ **Test Build** - `npm run build` in frontend
-4. ⏭️ **Test Backend** - `python backend/app.py`
-5. ⏭️ **Docker Test** - `docker-compose up`
-6. ⏭️ **Feature Implementation** - Start with frontend layout components
-
----
-
-**Last Updated:** March 15, 2026  
-**Status:** ✨ Structure Ready for Development
+**Last Updated:** 05/05/2026  
+**Status:** 🚀 Production-Ready Architecture
