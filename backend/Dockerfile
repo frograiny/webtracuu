@@ -31,7 +31,10 @@ RUN pip install --no-cache /wheels/*
 # Copy mã nguồn
 COPY . .
 
+# Copy entrypoint script và đảm bảo quyền thực thi
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 8000
 
-# Khởi chạy server theo chuẩn modular (app.main:app)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["/entrypoint.sh"]

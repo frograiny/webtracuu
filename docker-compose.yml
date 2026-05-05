@@ -1,5 +1,25 @@
 services:
   # ============================
+  # Database: PostgreSQL 15
+  # ============================
+  postgres:
+    image: postgres:15-alpine
+    container_name: vnu_research_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1203
+      POSTGRES_DB: vnu_research_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d vnu_research_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ============================
   # Backend: FastAPI + PostgreSQL
   # ============================
   backend:
@@ -15,22 +35,15 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: "60"
       BACKEND_CORS_ORIGINS: '["http://localhost:5173","http://127.0.0.1:5173"]'
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     volumes:
-      - ./backend:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-
-  postgres:
-    image: postgres:15-alpine
-    container_name: vnu_research_postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1203
-      POSTGRES_DB: vnu_research_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - ./backend/app:/app/app
+      - ./backend/alembic:/app/alembic
+      - ./backend/seed_data.py:/app/seed_data.py
+    # Entrypoint xử lý migration + seed, sau đó chạy uvicorn
+    # Truyền --reload để hot-reload khi dev
+    command: ["--reload"]
 
   # ============================
   # Frontend: React + Vite
@@ -42,9 +55,6 @@ services:
     container_name: vnu_research_frontend
     ports:
       - "5173:5173"
-    volumes:
-      - ./frontend/vnu-frontend:/app
-      - /app/node_modules
     environment:
       VITE_API_URL: "http://localhost:8000/api/v1"
       CHOKIDAR_USEPOLLING: "true"
