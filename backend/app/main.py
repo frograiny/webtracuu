@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
+from prometheus_fastapi_instrumentator import Instrumentator
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.core.rate_limit import limiter
@@ -24,16 +25,20 @@ logger.add("logs/app_{time:YYYY-MM-DD}.log", rotation="10 MB", retention="10 day
 async def lifespan(app: FastAPI):
     logger.info("Initializing Cache (RedisBackend)...")
     redis = aioredis.from_url(settings.REDIS_URL)
+    app.state.redis = redis
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     yield
     logger.info("Shutting down...")
 
 app = FastAPI(
     title="VNU Research API",
-    description="API with Rate Limiting and Caching",
+    description="API with Rate Limiting, Caching and Observability",
     version="1.0.0",
     lifespan=lifespan,
 )
+
+# Đăng ký Prometheus Metrics
+Instrumentator().instrument(app).expose(app)
 
 # Đăng ký Rate Limiter
 app.state.limiter = limiter
@@ -68,6 +73,11 @@ async def api_exception_handler(request, exc: APIException):
             "detail": exc.detail,
         },
     )
+
+@app.get("/health", tags=["ops"])
+async def health_check():
+    """Endpoint for ops basics: container health check."""
+    return {"status": "ok", "service": "vnu_research_backend"}
 
 
 @app.exception_handler(RequestValidationError)

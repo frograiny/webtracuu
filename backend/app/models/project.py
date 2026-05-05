@@ -21,7 +21,7 @@ class ResearchProject(Base):
     # --- Cột chuẩn hóa cho tìm kiếm nhanh (pre-computed, indexed) ---
     search_vector = Column(
         TSVECTOR, 
-        Computed("to_tsvector('simple', unaccent(coalesce(title, '')) || ' ' || unaccent(coalesce(author, '')))", persisted=True)
+        Computed("setweight(to_tsvector('simple', unaccent(coalesce(title, ''))), 'A') || setweight(to_tsvector('simple', unaccent(coalesce(author, ''))), 'C')", persisted=True)
     )
 
     __table_args__ = (

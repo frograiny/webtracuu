@@ -5,11 +5,12 @@ from fastapi.security import OAuth2PasswordBearer  # type: ignore
 from pydantic import BaseModel  # type: ignore
 from sqlalchemy.orm import Session  # type: ignore
 
+from datetime import datetime, timezone
 from app.core.exceptions import ConflictError, NotFoundError, ForbiddenError
-from app.core.security import create_access_token, decode_access_token, get_password_hash, verify_password
+from app.core.security import create_access_token, create_refresh_token, decode_access_token, decode_token, get_password_hash, verify_password
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.auth import LoginRequest, TokenResponse, UserCreate, UserRead
+from app.schemas.auth import LoginRequest, TokenResponse, UserCreate, UserRead, RefreshRequest
 from app.core.rate_limit import limiter
 
 router = APIRouter()
@@ -93,9 +94,45 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
 
     return {
         "access_token": create_access_token(user.id),
+        "refresh_token": create_refresh_token(user.id),
         "token_type": "bearer",
         "user": user,
     }
+
+@router.post("/refresh")
+async def refresh_token(request: Request, payload: RefreshRequest, db: Session = Depends(get_db)):
+    """Cấp lại Access Token mới dựa trên Refresh Token hợp lệ."""
+    token_data = decode_token(payload.refresh_token)
+    if not token_data or token_data.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    
+    jti = token_data.get("jti")
+    is_blacklisted = await request.app.state.redis.get(f"blacklist:{jti}")
+    if is_blacklisted:
+         raise HTTPException(status_code=401, detail="Token has been revoked")
+
+    user_id = token_data.get("sub")
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user or not user.is_active:
+        raise HTTPException(status_code=401, detail="User not found or inactive")
+        
+    return {
+        "access_token": create_access_token(user.id),
+        "token_type": "bearer"
+    }
+
+@router.post("/logout")
+async def logout(request: Request, payload: RefreshRequest):
+    """Đăng xuất và đưa Refresh Token vào danh sách đen (Blacklist)."""
+    token_data = decode_token(payload.refresh_token)
+    if token_data and token_data.get("type") == "refresh":
+        jti = token_data.get("jti")
+        exp = token_data.get("exp")
+        now = datetime.now(timezone.utc).timestamp()
+        ttl = int(exp - now)
+        if ttl > 0:
+            await request.app.state.redis.setex(f"blacklist:{jti}", ttl, "true")
+    return {"status": "success", "message": "Logged out successfully"}
 
 
 @router.get("/me", response_model=UserRead)

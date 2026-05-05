@@ -21,6 +21,19 @@ except Exception as e:
 done
 echo "PostgreSQL is ready!"
 
+# Enable unaccent extension
+echo "Enabling PostgreSQL extensions..."
+python -c "
+import os, psycopg2
+conn = psycopg2.connect(os.environ['DATABASE_URL'])
+cursor = conn.cursor()
+cursor.execute('CREATE EXTENSION IF NOT EXISTS unaccent;')
+conn.commit()
+cursor.close()
+conn.close()
+print('Extensions enabled!')
+"
+
 # Chạy migration (tạo bảng nếu chưa có)
 echo "Running database setup..."
 python -c "

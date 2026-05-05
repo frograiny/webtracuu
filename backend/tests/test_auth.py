@@ -4,7 +4,9 @@ def test_login(client, admin_user):
         json={"email": "admin@test.com", "password": "admin123"},
     )
     assert response.status_code == 200
-    assert "access_token" in response.json()
+    data = response.json()
+    assert "access_token" in data
+    assert "refresh_token" in data
 
 def test_login_invalid(client):
     response = client.post(

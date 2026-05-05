@@ -9,9 +9,11 @@ Thuật toán tìm kiếm hybrid:
 
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status, Request  # type: ignore
+import re
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request, BackgroundTasks  # type: ignore
 from sqlalchemy import and_, case, func, literal, or_  # type: ignore
 from sqlalchemy.orm import Session  # type: ignore
+from prometheus_client import Counter, Histogram
 
 from app.api.v1.auth import get_current_user, get_current_admin
 from app.core.exceptions import ConflictError, NotFoundError, ForbiddenError
@@ -32,6 +34,40 @@ from app.utils.audience import STUDENT_AUDIENCE, normalize_target_audience
 from app.utils.text import normalize_query
 
 router = APIRouter()
+
+# ────────────────────────────────────────────────────
+# Business Metrics (Prometheus)
+# ────────────────────────────────────────────────────
+SEARCH_REQUESTS = Counter(
+    "search_requests_total",
+    "Total search requests",
+    ["status"] # found, empty
+)
+
+SEARCH_RESULTS = Histogram(
+    "search_results_count",
+    "Number of search results returned",
+    buckets=[0, 1, 5, 10, 20, 50, 100]
+)
+
+# ────────────────────────────────────────────────────
+# Cache Strategy
+# ────────────────────────────────────────────────────
+def search_key_builder(func, namespace: str = "", request: Request = None, response=None, *args, **kwargs):
+    # Tối ưu Cache Key bằng cách loại bỏ khoảng trắng thừa và viết thường
+    q = kwargs.get("q", "").strip().lower()
+    q = re.sub(r'\s+', ' ', q)
+    offset = kwargs.get("offset", 0)
+    limit = kwargs.get("limit", 20)
+    # Các filter khác
+    doc_type = kwargs.get("type", "Tất cả")
+    field = kwargs.get("field", "Tất cả")
+    target = kwargs.get("target", "Tất cả")
+    year = kwargs.get("year", "Tất cả")
+    return f"{namespace}:{func.__name__}:{q}:{doc_type}:{field}:{target}:{year}:{offset}:{limit}"
+
+async def clear_search_cache():
+    await FastAPICache.clear(namespace="search")
 
 # ────────────────────────────────────────────────────
 # Helpers
@@ -81,6 +117,22 @@ def _apply_base_filters(query, *, doc_type: str, field: str, target: str, year: 
 # Thuật toán tìm kiếm mới: True Production (FTS + pg_trgm)
 # ────────────────────────────────────────────────────
 
+SYNONYMS = {
+    "ai": ["ai", "tri tue nhan tao", "artificial intelligence"],
+    "cntt": ["cntt", "cong nghe thong tin", "it"],
+    "y hoc": ["y hoc", "y te", "y khoa"],
+}
+
+def apply_synonyms(query: str) -> str:
+    words = query.lower().split()
+    expanded = []
+    for w in words:
+        if w in SYNONYMS:
+            expanded.extend(SYNONYMS[w])
+        else:
+            expanded.append(w)
+    return " ".join(set(expanded))
+
 
 def _build_search_query(db: Session, q_normalized: str):
     """
@@ -91,7 +143,8 @@ def _build_search_query(db: Session, q_normalized: str):
     - Dùng hàm ts_rank để lấy điểm BM25/TF-IDF chuẩn xác.
     - Dùng pg_trgm similarity cho Fuzzy matching (sai chính tả, đảo từ).
     """
-    keywords = q_normalized.split()
+    expanded_query = apply_synonyms(q_normalized)
+    keywords = expanded_query.split()
     if not keywords:
         return None
 
@@ -133,7 +186,7 @@ def _build_search_query(db: Session, q_normalized: str):
 
 @router.get("/search", response_model=SearchResponse)
 @limiter.limit("30/minute")
-@cache(expire=300)
+@cache(expire=300, namespace="search", key_builder=search_key_builder)
 def search_projects(
     request: Request,
     q: str = Query("", max_length=200, description="Từ khóa tìm kiếm"),
@@ -157,6 +210,8 @@ def search_projects(
         search_query = _build_search_query(db, q_normalized)
 
         if search_query is None:
+            SEARCH_REQUESTS.labels(status="empty").inc()
+            SEARCH_RESULTS.observe(0)
             return SearchResponse(data=SearchData(total=0, items=[]))
 
         # Áp dụng base filters lên query (filter trên entity, không phải tuple)
@@ -174,6 +229,11 @@ def search_projects(
 
         # rows là list of (ResearchProject, score) tuples
         items = [_to_project_item(row[0]) for row in rows]
+        
+        # Ghi nhận Business Metrics
+        SEARCH_REQUESTS.labels(status="found" if total_count > 0 else "empty").inc()
+        SEARCH_RESULTS.observe(total_count)
+        
         return SearchResponse(data=SearchData(total=total_count, items=items))
 
     # Không có query → trả về tất cả (có filter)
@@ -191,6 +251,7 @@ def search_projects(
 @router.post("", response_model=ProjectDetailResponse, status_code=status.HTTP_201_CREATED)
 def create_project(
     payload: ProjectCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_admin: User = Depends(get_current_admin),
 ):
@@ -227,6 +288,9 @@ def create_project(
     db.commit()
     db.refresh(project)
     
+    # Invalidate Cache
+    background_tasks.add_task(clear_search_cache)
+    
     return ProjectDetailResponse(data=_to_project_item(project))
 
 
@@ -234,6 +298,7 @@ def create_project(
 def update_project(
     project_id: str,
     payload: ProjectUpdate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_admin: User = Depends(get_current_admin),
 ):
@@ -284,12 +349,16 @@ def update_project(
     db.commit()
     db.refresh(project)
     
+    # Invalidate Cache
+    background_tasks.add_task(clear_search_cache)
+    
     return ProjectDetailResponse(data=_to_project_item(project))
 
 
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_project(
     project_id: str,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_admin: User = Depends(get_current_admin),
 ):
@@ -304,5 +373,8 @@ def delete_project(
     
     db.delete(project)
     db.commit()
+    
+    # Invalidate Cache
+    background_tasks.add_task(clear_search_cache)
     
     return None
