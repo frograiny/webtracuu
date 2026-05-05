@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, status  # type: ignore
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request  # type: ignore
 from fastapi.security import OAuth2PasswordBearer  # type: ignore
 from pydantic import BaseModel  # type: ignore
 from sqlalchemy.orm import Session  # type: ignore
@@ -10,6 +10,7 @@ from app.core.security import create_access_token, decode_access_token, get_pass
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import LoginRequest, TokenResponse, UserCreate, UserRead
+from app.core.rate_limit import limiter
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -38,6 +39,28 @@ def get_current_user(
     return user
 
 
+def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
+    """Dependency to ensure user has Admin role."""
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return current_user
+
+
+def get_current_viewer(current_user: User = Depends(get_current_user)) -> User:
+    """Dependency to ensure user has Viewer or Admin role."""
+    if current_user.role not in ["viewer", "admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Viewer access required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return current_user
+
+
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def register_user(payload: UserCreate, db: Session = Depends(get_db)):
     email = payload.email.lower()
@@ -60,7 +83,8 @@ def register_user(payload: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)):
     user = get_user_by_email(db, payload.email)
     if not user or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Email hoặc mật khẩu không đúng")
@@ -97,31 +121,36 @@ class UpdateUserRoleResponse(BaseModel):
 
 @router.get("/users", response_model=dict)
 def list_users(
+    limit: int = Query(20, ge=1, le=100, description="Số lượng kết quả trả về"),
+    offset: int = Query(0, ge=0, description="Bỏ qua bao nhiêu kết quả"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_admin: User = Depends(get_current_admin),
 ):
     """
-    List all users.
+    List all users with pagination.
     
     Only admin can access this endpoint.
     """
-    if current_user.role != "admin":
-        raise ForbiddenError("Chỉ admin có thể xem danh sách người dùng")
+    query = db.query(User)
+    total_count = query.count()
+    users = query.order_by(User.created_at.desc()).offset(offset).limit(limit).all()
     
-    users = db.query(User).all()
     return {
         "status": "success",
-        "data": [
-            {
-                "id": user.id,
-                "email": user.email,
-                "full_name": user.full_name,
-                "role": user.role,
-                "is_active": user.is_active,
-                "created_at": user.created_at.isoformat() if user.created_at else None,
-            }
-            for user in users
-        ],
+        "data": {
+            "total": total_count,
+            "items": [
+                {
+                    "id": user.id,
+                    "email": user.email,
+                    "full_name": user.full_name,
+                    "role": user.role,
+                    "is_active": user.is_active,
+                    "created_at": user.created_at.isoformat() if user.created_at else None,
+                }
+                for user in users
+            ]
+        }
     }
 
 
@@ -130,16 +159,13 @@ def update_user_role(
     user_id: str,
     payload: UpdateUserRoleRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_admin: User = Depends(get_current_admin),
 ):
     """
     Update user role.
     
     Only admin can access this endpoint.
     """
-    if current_user.role != "admin":
-        raise ForbiddenError("Chỉ admin có thể cập nhật vai trò người dùng")
-    
     # Validate role
     if payload.role not in ["admin", "viewer"]:
         raise HTTPException(status_code=400, detail="Role must be 'admin' or 'viewer'")
@@ -159,20 +185,17 @@ def update_user_role(
 def delete_user(
     user_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_admin: User = Depends(get_current_admin),
 ):
     """
     Delete a user.
     
     Only admin can access this endpoint.
     """
-    if current_user.role != "admin":
-        raise ForbiddenError("Chỉ admin có thể xóa người dùng")
-    
     # Prevent deleting self
-    if user_id == current_user.id:
-        raise HTTPException(status_code=400, detail="Không thể xóa chính mình")
-    
+    if user_id == current_admin.id:
+        raise ConflictError("Không thể tự xóa tài khoản của chính mình")
+        
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise NotFoundError("Người dùng không tồn tại")
@@ -187,20 +210,17 @@ def delete_user(
 def deactivate_user(
     user_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_admin: User = Depends(get_current_admin),
 ):
     """
     Deactivate a user.
     
     Only admin can access this endpoint.
     """
-    if current_user.role != "admin":
-        raise ForbiddenError("Chỉ admin có thể vô hiệu hóa người dùng")
-    
     # Prevent deactivating self
-    if user_id == current_user.id:
-        raise HTTPException(status_code=400, detail="Không thể vô hiệu hóa chính mình")
-    
+    if user_id == current_admin.id:
+        raise ConflictError("Không thể tự vô hiệu hóa tài khoản của chính mình")
+        
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise NotFoundError("Người dùng không tồn tại")

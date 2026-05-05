@@ -11,3 +11,10 @@ alembic
 bcrypt<5
 email-validator
 python-jose[cryptography]
+
+# Thư viện cho Production-Ready API
+slowapi
+fastapi-cache2
+loguru
+pytest
+httpx

@@ -9,13 +9,14 @@ Thuật toán tìm kiếm hybrid:
 
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status  # type: ignore
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request  # type: ignore
 from sqlalchemy import and_, case, func, literal, or_  # type: ignore
 from sqlalchemy.orm import Session  # type: ignore
 
-from app.api.v1.auth import get_current_user
+from app.api.v1.auth import get_current_user, get_current_admin
 from app.core.exceptions import ConflictError, NotFoundError, ForbiddenError
-from app.core.security import admin_required
+from app.core.rate_limit import limiter
+from fastapi_cache.decorator import cache
 from app.db.session import get_db  # type: ignore
 from app.models.project import ResearchProject  # type: ignore
 from app.models.user import User  # type: ignore
@@ -146,7 +147,10 @@ def _build_search_query(db: Session, q_normalized: str):
 
 
 @router.get("/search", response_model=SearchResponse)
+@limiter.limit("30/minute")
+@cache(expire=300)
 def search_projects(
+    request: Request,
     q: str = Query("", max_length=200, description="Từ khóa tìm kiếm"),
     type: str = Query("Tất cả", description="Lọc theo loại tài liệu"),
     field: str = Query("Tất cả", description="Lọc theo lĩnh vực"),
@@ -203,17 +207,13 @@ def search_projects(
 def create_project(
     payload: ProjectCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_admin: User = Depends(get_current_admin),
 ):
     """
     Tạo mới một đề tài NCKH.
     
     Chỉ admin mới có quyền tạo.
     """
-    # Check admin role
-    if current_user.role != "admin":
-        raise ForbiddenError("Chỉ admin có thể tạo đề tài")
-    
     # Check duplicate title
     existing = (
         db.query(ResearchProject)
@@ -250,18 +250,13 @@ def update_project(
     project_id: str,
     payload: ProjectUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_admin: User = Depends(get_current_admin),
 ):
     """
     Cập nhật một đề tài NCKH.
     
     Chỉ admin mới có quyền cập nhật.
     """
-    # Check admin role
-    if current_user.role != "admin":
-        raise ForbiddenError("Chỉ admin có thể cập nhật đề tài")
-    
-    # Find project
     project = db.query(ResearchProject).filter(ResearchProject.id == project_id).first()
     if not project:
         raise NotFoundError("Không tìm thấy đề tài")
@@ -311,18 +306,13 @@ def update_project(
 def delete_project(
     project_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_admin: User = Depends(get_current_admin),
 ):
     """
     Xóa một đề tài NCKH.
     
     Chỉ admin mới có quyền xóa.
     """
-    # Check admin role
-    if current_user.role != "admin":
-        raise ForbiddenError("Chỉ admin có thể xóa đề tài")
-    
-    # Find and delete project
     project = db.query(ResearchProject).filter(ResearchProject.id == project_id).first()
     if not project:
         raise NotFoundError("Không tìm thấy đề tài")
