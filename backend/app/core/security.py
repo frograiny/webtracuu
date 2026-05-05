@@ -1,8 +1,11 @@
 from datetime import datetime, timedelta, timezone
+from functools import wraps
 from typing import Any
 
 import bcrypt  # type: ignore
+from fastapi import Depends, HTTPException, status  # type: ignore
 from jose import JWTError, jwt  # type: ignore
+from sqlalchemy.orm import Session  # type: ignore
 
 from app.core.config import settings
 
@@ -30,3 +33,54 @@ def decode_access_token(token: str) -> str | None:
         return None
     subject = payload.get("sub")
     return subject if isinstance(subject, str) else None
+
+
+# ────────────────────────────────────────────────────
+# Role-Based Access Control (RBAC) Decorators
+# ────────────────────────────────────────────────────
+
+
+def get_user_role(user_id: str, db: Session) -> str | None:
+    """Helper function to fetch user role from database."""
+    from app.models.user import User  # Import here to avoid circular import
+    
+    user = db.query(User).filter(User.id == user_id).first()
+    return user.role if user else None
+
+
+def admin_required(func):
+    """Decorator to restrict endpoint to admin users only."""
+    @wraps(func)
+    async def wrapper(*args, current_user=None, db=None, **kwargs):
+        if not current_user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required",
+            )
+        if current_user.role != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin access required",
+            )
+        return await func(*args, current_user=current_user, db=db, **kwargs)
+    
+    return wrapper
+
+
+def viewer_required(func):
+    """Decorator to restrict endpoint to authenticated users (viewer or admin)."""
+    @wraps(func)
+    async def wrapper(*args, current_user=None, db=None, **kwargs):
+        if not current_user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required",
+            )
+        if current_user.role not in ["viewer", "admin"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Viewer access required",
+            )
+        return await func(*args, current_user=current_user, db=db, **kwargs)
+    
+    return wrapper

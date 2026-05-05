@@ -1,6 +1,6 @@
 """Pydantic schemas cho Research Project API responses."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
 class ProjectItem(BaseModel):
@@ -19,6 +19,42 @@ class ProjectItem(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ProjectCreate(BaseModel):
+    """Schema cho tạo mới một đề tài NCKH."""
+    tenDeTai: str = Field(..., min_length=10, max_length=500, description="Tiêu đề đề tài")
+    chuNhiem: str = Field(..., min_length=3, max_length=200, description="Chủ nhiệm đề tài")
+    doiTuong: str = Field(..., description="Đối tượng (Sinh viên/Giảng viên/Doanh nghiệp)")
+    linhVuc: str = Field(..., min_length=3, max_length=200, description="Lĩnh vực nghiên cứu")
+    namThucHien: int = Field(..., ge=2000, le=2030, description="Năm thực hiện")
+    trangThai: str = Field(default="Đang thực hiện", description="Trạng thái")
+    tomTat: str = Field(default="", max_length=2000, description="Tóm tắt nội dung")
+    tuKhoa: list[str] = Field(default_factory=list, description="Từ khóa")
+    loaiTaiLieu: str = Field(default="", description="Loại tài liệu")
+    namTrienKhai: int | None = Field(default=None, ge=2000, le=2030, description="Năm triển khai")
+
+    @validator("tenDeTai", "chuNhiem", "linhVuc")
+    def strip_whitespace(cls, v):
+        return v.strip() if v else v
+
+
+class ProjectUpdate(BaseModel):
+    """Schema cho cập nhật một đề tài NCKH."""
+    tenDeTai: str | None = Field(None, min_length=10, max_length=500)
+    chuNhiem: str | None = Field(None, min_length=3, max_length=200)
+    doiTuong: str | None = None
+    linhVuc: str | None = Field(None, min_length=3, max_length=200)
+    namThucHien: int | None = Field(None, ge=2000, le=2030)
+    trangThai: str | None = None
+    tomTat: str | None = Field(None, max_length=2000)
+    tuKhoa: list[str] | None = None
+    loaiTaiLieu: str | None = None
+    namTrienKhai: int | None = Field(None, ge=2000, le=2030)
+
+    @validator("tenDeTai", "chuNhiem", "linhVuc", pre=True)
+    def strip_whitespace(cls, v):
+        return v.strip() if v else v
 
 
 class SearchData(BaseModel):

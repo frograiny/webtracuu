@@ -7,15 +7,23 @@ Thuật toán tìm kiếm hybrid:
   3. Hỗ trợ cả có dấu lẫn không dấu, không cần PostgreSQL extension
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query  # type: ignore
+from uuid import uuid4
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status  # type: ignore
 from sqlalchemy import and_, case, func, literal, or_  # type: ignore
 from sqlalchemy.orm import Session  # type: ignore
 
+from app.api.v1.auth import get_current_user
+from app.core.exceptions import ConflictError, NotFoundError, ForbiddenError
+from app.core.security import admin_required
 from app.db.session import get_db  # type: ignore
 from app.models.project import ResearchProject  # type: ignore
+from app.models.user import User  # type: ignore
 from app.schemas.project import (
+    ProjectCreate,
     ProjectDetailResponse,
     ProjectItem,
+    ProjectUpdate,
     SearchData,
     SearchResponse,
 )
@@ -191,10 +199,135 @@ def search_projects(
     return SearchResponse(data=SearchData(total=total_count, items=items))
 
 
-@router.get("/{project_id}", response_model=ProjectDetailResponse)
-def get_project_detail(project_id: str, db: Session = Depends(get_db)):
-    """Lấy chi tiết 1 đề tài NCKH theo ID."""
+@router.post("", response_model=ProjectDetailResponse, status_code=status.HTTP_201_CREATED)
+def create_project(
+    payload: ProjectCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Tạo mới một đề tài NCKH.
+    
+    Chỉ admin mới có quyền tạo.
+    """
+    # Check admin role
+    if current_user.role != "admin":
+        raise ForbiddenError("Chỉ admin có thể tạo đề tài")
+    
+    # Check duplicate title
+    existing = (
+        db.query(ResearchProject)
+        .filter(ResearchProject.title.ilike(f"%{payload.tenDeTai}%"))
+        .first()
+    )
+    if existing:
+        raise ConflictError("Tiêu đề đề tài đã tồn tại")
+    
+    # Create new project
+    project = ResearchProject(
+        id=str(uuid4()),
+        title=payload.tenDeTai,
+        author=payload.chuNhiem,
+        target_audience=payload.doiTuong,
+        field=payload.linhVuc,
+        year=payload.namThucHien,
+        status=payload.trangThai,
+        abstract=payload.tomTat,
+        keywords=payload.tuKhoa,
+        document_type=payload.loaiTaiLieu,
+        implementation_year=payload.namTrienKhai,
+    )
+    
+    db.add(project)
+    db.commit()
+    db.refresh(project)
+    
+    return ProjectDetailResponse(data=_to_project_item(project))
+
+
+@router.put("/{project_id}", response_model=ProjectDetailResponse)
+def update_project(
+    project_id: str,
+    payload: ProjectUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Cập nhật một đề tài NCKH.
+    
+    Chỉ admin mới có quyền cập nhật.
+    """
+    # Check admin role
+    if current_user.role != "admin":
+        raise ForbiddenError("Chỉ admin có thể cập nhật đề tài")
+    
+    # Find project
     project = db.query(ResearchProject).filter(ResearchProject.id == project_id).first()
     if not project:
-        raise HTTPException(status_code=404, detail="Không tìm thấy đề tài")
+        raise NotFoundError("Không tìm thấy đề tài")
+    
+    # Check duplicate title if updating title
+    if payload.tenDeTai and payload.tenDeTai != project.title:
+        existing = (
+            db.query(ResearchProject)
+            .filter(
+                ResearchProject.title.ilike(f"%{payload.tenDeTai}%"),
+                ResearchProject.id != project_id,
+            )
+            .first()
+        )
+        if existing:
+            raise ConflictError("Tiêu đề đề tài đã tồn tại")
+    
+    # Update fields
+    if payload.tenDeTai:
+        project.title = payload.tenDeTai
+    if payload.chuNhiem:
+        project.author = payload.chuNhiem
+    if payload.doiTuong:
+        project.target_audience = payload.doiTuong
+    if payload.linhVuc:
+        project.field = payload.linhVuc
+    if payload.namThucHien:
+        project.year = payload.namThucHien
+    if payload.trangThai:
+        project.status = payload.trangThai
+    if payload.tomTat is not None:
+        project.abstract = payload.tomTat
+    if payload.tuKhoa is not None:
+        project.keywords = payload.tuKhoa
+    if payload.loaiTaiLieu is not None:
+        project.document_type = payload.loaiTaiLieu
+    if payload.namTrienKhai is not None:
+        project.implementation_year = payload.namTrienKhai
+    
+    db.commit()
+    db.refresh(project)
+    
     return ProjectDetailResponse(data=_to_project_item(project))
+
+
+@router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_project(
+    project_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Xóa một đề tài NCKH.
+    
+    Chỉ admin mới có quyền xóa.
+    """
+    # Check admin role
+    if current_user.role != "admin":
+        raise ForbiddenError("Chỉ admin có thể xóa đề tài")
+    
+    # Find and delete project
+    project = db.query(ResearchProject).filter(ResearchProject.id == project_id).first()
+    if not project:
+        raise NotFoundError("Không tìm thấy đề tài")
+    
+    db.delete(project)
+    db.commit()
+    
+    return None
