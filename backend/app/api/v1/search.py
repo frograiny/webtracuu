@@ -78,59 +78,44 @@ def _apply_base_filters(query, *, doc_type: str, field: str, target: str, year: 
 
 
 # ────────────────────────────────────────────────────
-# Thuật toán tìm kiếm mới: Single-pass Token Scoring
+# Thuật toán tìm kiếm mới: True Production (FTS + pg_trgm)
 # ────────────────────────────────────────────────────
 
 
 def _build_search_query(db: Session, q_normalized: str):
     """
-    Xây dựng query tìm kiếm dựa trên token scoring.
+    Xây dựng query tìm kiếm dựa trên PostgreSQL FTS và pg_trgm.
 
     Thuật toán:
-    - Tách query thành các keyword (tokens)
-    - Mỗi token được tìm bằng LIKE trên cột đã normalized (có index)
-    - Tính điểm: title match = 3 điểm, author match = 1 điểm
-    - Exact match (title chứa toàn bộ query) = bonus 5 điểm
-    - Sắp xếp theo tổng điểm giảm dần
-
-    So với thuật toán cũ:
-    - Chỉ 1 query (thay vì 2: FTS + fallback)
-    - Luôn dùng cột normalized → không cần runtime translate()
-    - Điểm số chính xác hơn ts_rank cho tiếng Việt
+    - Sử dụng TSVECTOR (search_vector) kết hợp với toán tử @@ để tìm kiếm Full Text.
+    - Dùng hàm ts_rank để lấy điểm BM25/TF-IDF chuẩn xác.
+    - Dùng pg_trgm similarity cho Fuzzy matching (sai chính tả, đảo từ).
     """
     keywords = q_normalized.split()
     if not keywords:
         return None
 
-    # Xây dựng điều kiện match: ít nhất 1 keyword match title HOẶC author
-    match_conditions = []
-    score_components = []
+    # Thay khoảng trắng bằng & để tạo TSQUERY (AND logic cho FTS)
+    tsquery_string = " & ".join(keywords)
+    search_query = func.to_tsquery('simple', func.unaccent(tsquery_string))
 
-    for kw in keywords:
-        pattern = f"%{kw}%"
-        title_match = ResearchProject.title_normalized.like(pattern)
-        author_match = ResearchProject.author_normalized.like(pattern)
+    # Điều kiện FTS
+    fts_condition = ResearchProject.search_vector.op('@@')(search_query)
 
-        match_conditions.append(or_(title_match, author_match))
+    # Điểm FTS (ts_rank)
+    ts_rank_score = func.ts_rank(ResearchProject.search_vector, search_query)
 
-        # Tính điểm cho mỗi keyword: title = 3đ, author = 1đ
-        score_components.append(
-            case((title_match, 3), else_=0) + case((author_match, 1), else_=0)
-        )
+    # Điểm Similarity (pg_trgm) trên Title và Author
+    # Giúp tìm những từ sai chính tả hoặc gõ sát nghĩa
+    title_sim = func.similarity(func.unaccent(ResearchProject.title), func.unaccent(q_normalized))
+    author_sim = func.similarity(func.unaccent(ResearchProject.author), func.unaccent(q_normalized))
+    max_sim = func.greatest(title_sim, author_sim)
 
-    # Bonus: exact phrase match trên title = +5đ
-    exact_phrase_bonus = case(
-        (ResearchProject.title_normalized.like(f"%{q_normalized}%"), 5),
-        else_=0,
-    )
+    # Tổng điểm: ưu tiên FTS rank (trọng số cao) + Similarity
+    total_score = ts_rank_score * 2.0 + max_sim
 
-    # Tổng điểm
-    total_score = exact_phrase_bonus
-    for sc in score_components:
-        total_score = total_score + sc
-
-    # Filter: tất cả keywords phải match ít nhất 1 cột (AND logic)
-    combined_filter = and_(*match_conditions)
+    # Filter: thỏa mãn FTS hoặc similarity > 0.2 (để pass lỗi chính tả nhỏ)
+    combined_filter = or_(fts_condition, max_sim > 0.2)
 
     query = (
         db.query(ResearchProject, total_score.label("relevance_score"))

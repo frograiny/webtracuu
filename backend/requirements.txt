@@ -18,3 +18,4 @@ fastapi-cache2
 loguru
 pytest
 httpx
+redis

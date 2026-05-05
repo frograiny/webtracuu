@@ -9,7 +9,8 @@ import sys
 from loguru import logger
 from contextlib import asynccontextmanager
 from fastapi_cache import FastAPICache
-from fastapi_cache.backends.inmemory import InMemoryBackend
+from fastapi_cache.backends.redis import RedisBackend
+from redis import asyncio as aioredis
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.core.rate_limit import limiter
@@ -21,8 +22,9 @@ logger.add("logs/app_{time:YYYY-MM-DD}.log", rotation="10 MB", retention="10 day
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Initializing Cache (InMemoryBackend)...")
-    FastAPICache.init(InMemoryBackend())
+    logger.info("Initializing Cache (RedisBackend)...")
+    redis = aioredis.from_url(settings.REDIS_URL)
+    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     yield
     logger.info("Shutting down...")
 

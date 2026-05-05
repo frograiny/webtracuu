@@ -5,6 +5,7 @@ import os
 class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DATABASE_URL: str
+    REDIS_URL: str = "redis://localhost:6379/0"
     SECRET_KEY: str = "change-this-secret-in-production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     ALGORITHM: str = "HS256"

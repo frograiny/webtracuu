@@ -3,6 +3,12 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.dialects.postgresql import TSVECTOR
+
+@compiles(TSVECTOR, 'sqlite')
+def compile_tsvector(type_, compiler, **kw):
+    return "TEXT"
 
 from app.main import app
 from app.db.session import Base, get_db
@@ -21,7 +27,13 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 @pytest.fixture(scope="session")
 def db_engine():
-    from app.models import project # Ensure all models are imported
+    from app.models.project import ResearchProject
+    from app.models.user import User
+    
+    # Remove ResearchProject table to avoid SQLite errors with PostgreSQL specific functions (to_tsvector)
+    if ResearchProject.__table__ in Base.metadata.sorted_tables:
+        Base.metadata.remove(ResearchProject.__table__)
+        
     Base.metadata.create_all(bind=engine)
     yield engine
     Base.metadata.drop_all(bind=engine)

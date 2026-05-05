@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Text, JSON, event  # type: ignore
+from sqlalchemy import Column, Integer, String, Text, JSON, Computed, Index  # type: ignore
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from app.db.session import Base
-from app.utils.text import remove_diacritics
 
 
 class ResearchProject(Base):
@@ -19,17 +19,11 @@ class ResearchProject(Base):
     implementation_year = Column(Integer, nullable=True)
 
     # --- Cột chuẩn hóa cho tìm kiếm nhanh (pre-computed, indexed) ---
-    title_normalized = Column(String, nullable=True, index=True)
-    author_normalized = Column(String, nullable=True, index=True)
+    search_vector = Column(
+        TSVECTOR, 
+        Computed("to_tsvector('simple', unaccent(coalesce(title, '')) || ' ' || unaccent(coalesce(author, '')))", persisted=True)
+    )
 
-
-def _auto_normalize(mapper, connection, target):
-    """Tự động cập nhật cột normalized khi insert/update."""
-    if target.title:
-        target.title_normalized = remove_diacritics(target.title).lower()
-    if target.author:
-        target.author_normalized = remove_diacritics(target.author).lower()
-
-
-event.listen(ResearchProject, "before_insert", _auto_normalize)
-event.listen(ResearchProject, "before_update", _auto_normalize)
+    __table_args__ = (
+        Index("ix_research_projects_search_vector", "search_vector", postgresql_using="gin"),
+    )

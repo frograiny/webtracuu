@@ -20,6 +20,15 @@ services:
       retries: 10
 
   # ============================
+  # Cache: Redis
+  # ============================
+  redis:
+    image: redis:7-alpine
+    container_name: vnu_research_redis
+    ports:
+      - "6379:6379"
+
+  # ============================
   # Backend: FastAPI + PostgreSQL
   # ============================
   backend:
@@ -34,9 +43,12 @@ services:
       SECRET_KEY: "change-this-secret-before-deploy"
       ACCESS_TOKEN_EXPIRE_MINUTES: "60"
       BACKEND_CORS_ORIGINS: '["http://localhost:5173","http://127.0.0.1:5173"]'
+      REDIS_URL: "redis://redis:6379/0"
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     volumes:
       - ./backend/app:/app/app
       - ./backend/alembic:/app/alembic
