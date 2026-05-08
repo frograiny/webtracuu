@@ -40,6 +40,8 @@ export function useSearch(filters: SearchFilters, options: UseSearchOptions = {}
 
             const cacheKey = JSON.stringify({ q: debouncedQuery, filters: debouncedFilters, page });
 
+            setError(null);
+
             // Check cache (chống trùng lặp truy vấn)
             if (cache.has(cacheKey)) {
                 const cachedData = cache.get(cacheKey)!;
@@ -50,7 +52,6 @@ export function useSearch(filters: SearchFilters, options: UseSearchOptions = {}
 
             try {
                 setLoading(true);
-                setError(null);
 
                 const limit = 10;
                 const offset = (page - 1) * limit;

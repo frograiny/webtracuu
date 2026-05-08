@@ -54,16 +54,15 @@ SEARCH_RESULTS = Histogram(
 # Cache Strategy
 # ────────────────────────────────────────────────────
 def search_key_builder(func, namespace: str = "", request: Request = None, response=None, *args, **kwargs):
-    # Tối ưu Cache Key bằng cách loại bỏ khoảng trắng thừa và viết thường
-    q = kwargs.get("q", "").strip().lower()
+    req_args = request.query_params if request else kwargs
+    q = req_args.get("q", "").strip().lower()
     q = re.sub(r'\s+', ' ', q)
-    offset = kwargs.get("offset", 0)
-    limit = kwargs.get("limit", 20)
-    # Các filter khác
-    doc_type = kwargs.get("type", "Tất cả")
-    field = kwargs.get("field", "Tất cả")
-    target = kwargs.get("target", "Tất cả")
-    year = kwargs.get("year", "Tất cả")
+    offset = req_args.get("offset", "0")
+    limit = req_args.get("limit", "10")
+    doc_type = req_args.get("type", "Tất cả")
+    field = req_args.get("field", "Tất cả")
+    target = req_args.get("target", "Tất cả")
+    year = req_args.get("year", "Tất cả")
     return f"{namespace}:{func.__name__}:{q}:{doc_type}:{field}:{target}:{year}:{offset}:{limit}"
 
 async def clear_search_cache():
@@ -94,10 +93,16 @@ def _to_project_item(item: ResearchProject) -> dict:
 def _build_target_filter(target: str):
     normalized_target = normalize_target_audience(target)
 
-    if normalized_target == STUDENT_AUDIENCE:
-        return ResearchProject.target_audience.in_([STUDENT_AUDIENCE, "Học sinh"])
+    student_filter = or_(
+        ResearchProject.target_audience.ilike("%sinh viên%"),
+        ResearchProject.target_audience.ilike("%học sinh%"),
+        ResearchProject.target_audience.ilike("%student%"),
+    )
 
-    return ResearchProject.target_audience.not_in([STUDENT_AUDIENCE, "Học sinh"])
+    if normalized_target == STUDENT_AUDIENCE:
+        return student_filter
+
+    return or_(~student_filter, ResearchProject.target_audience.is_(None))
 
 
 def _apply_base_filters(query, *, doc_type: str, field: str, target: str, year: str):

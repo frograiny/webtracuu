@@ -28,6 +28,8 @@ import os, psycopg2
 conn = psycopg2.connect(os.environ['DATABASE_URL'])
 cursor = conn.cursor()
 cursor.execute('CREATE EXTENSION IF NOT EXISTS unaccent;')
+cursor.execute('CREATE EXTENSION IF NOT EXISTS pg_trgm;')
+cursor.execute('ALTER FUNCTION unaccent(text) IMMUTABLE;')
 conn.commit()
 cursor.close()
 conn.close()

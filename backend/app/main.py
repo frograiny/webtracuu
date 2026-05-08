@@ -1,7 +1,7 @@
 from fastapi import FastAPI # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from fastapi.exceptions import RequestValidationError  # type: ignore
-from fastapi.responses import JSONResponse  # type: ignore
+from fastapi.responses import JSONResponse, RedirectResponse  # type: ignore
 from app.api.v1 import auth, filters, search
 from app.core.config import settings
 from app.core.exceptions import APIException
@@ -55,6 +55,12 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(search.router, prefix="/api/v1/projects", tags=["projects"])
 app.include_router(filters.router, prefix="/api/v1/filters", tags=["filters"])
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    """Redirect root path to API docs."""
+    return RedirectResponse(url="/docs")
 
 
 # ────────────────────────────────────────────────────
