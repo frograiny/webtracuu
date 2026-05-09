@@ -5,10 +5,12 @@ from fastapi.responses import JSONResponse, RedirectResponse  # type: ignore
 from app.api.v1 import auth, filters, search
 from app.core.config import settings
 from app.core.exceptions import APIException
+import asyncio
 import sys
 from loguru import logger
 from contextlib import asynccontextmanager
 from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -21,14 +23,46 @@ logger.remove()
 logger.add(sys.stdout, colorize=True, format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>")
 logger.add("logs/app_{time:YYYY-MM-DD}.log", rotation="10 MB", retention="10 days", level="INFO")
 
+
+class LocalRedisFallback:
+    def __init__(self):
+        self._store = {}
+
+    async def get(self, key: str):
+        item = self._store.get(key)
+        if not item:
+            return None
+        value, expires_at = item
+        if expires_at and expires_at <= asyncio.get_running_loop().time():
+            self._store.pop(key, None)
+            return None
+        return value
+
+    async def setex(self, key: str, ttl: int, value: str):
+        self._store[key] = (value, asyncio.get_running_loop().time() + ttl)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Initializing Cache (RedisBackend)...")
-    redis = aioredis.from_url(settings.REDIS_URL)
-    app.state.redis = redis
-    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+    redis = None
+    try:
+        logger.info("Initializing cache with Redis...")
+        redis = aioredis.from_url(
+            settings.REDIS_URL,
+            socket_connect_timeout=0.2,
+            socket_timeout=0.2,
+        )
+        await redis.ping()
+        app.state.redis = redis
+        FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+    except Exception as exc:
+        logger.warning(f"Redis unavailable, using in-memory cache: {exc}")
+        app.state.redis = LocalRedisFallback()
+        FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")
     yield
     logger.info("Shutting down...")
+    if redis is not None:
+        await redis.aclose()
 
 app = FastAPI(
     title="VNU Research API",

@@ -12,7 +12,7 @@ from uuid import uuid4
 import re
 from fastapi import APIRouter, Depends, HTTPException, Query, status, Request, BackgroundTasks  # type: ignore
 from sqlalchemy import and_, case, func, literal, or_  # type: ignore
-from sqlalchemy.orm import Session  # type: ignore
+from sqlalchemy.orm import Session, load_only  # type: ignore
 from prometheus_client import Counter, Histogram
 
 from app.api.v1.auth import get_current_user, get_current_admin
@@ -55,7 +55,7 @@ SEARCH_RESULTS = Histogram(
 # ────────────────────────────────────────────────────
 def search_key_builder(func, namespace: str = "", request: Request = None, response=None, *args, **kwargs):
     req_args = request.query_params if request else kwargs
-    q = req_args.get("q", "").strip().lower()
+    q = normalize_query(req_args.get("q", ""))
     q = re.sub(r'\s+', ' ', q)
     offset = req_args.get("offset", "0")
     limit = req_args.get("limit", "10")
@@ -63,7 +63,7 @@ def search_key_builder(func, namespace: str = "", request: Request = None, respo
     field = req_args.get("field", "Tất cả")
     target = req_args.get("target", "Tất cả")
     year = req_args.get("year", "Tất cả")
-    return f"{namespace}:{func.__name__}:{q}:{doc_type}:{field}:{target}:{year}:{offset}:{limit}"
+    return f"v2:{namespace}:{func.__name__}:{q}:{doc_type}:{field}:{target}:{year}:{offset}:{limit}"
 
 async def clear_search_cache():
     await FastAPICache.clear(namespace="search")
@@ -88,6 +88,28 @@ def _to_project_item(item: ResearchProject) -> dict:
         "loaiTaiLieu": item.document_type,
         "namTrienKhai": item.implementation_year,
     }
+
+
+def _project_list_query(db: Session):
+    return db.query(ResearchProject).options(
+        load_only(
+            ResearchProject.id,
+            ResearchProject.title,
+            ResearchProject.author,
+            ResearchProject.target_audience,
+            ResearchProject.field,
+            ResearchProject.year,
+            ResearchProject.status,
+            ResearchProject.abstract,
+            ResearchProject.keywords,
+            ResearchProject.document_type,
+            ResearchProject.implementation_year,
+        )
+    )
+
+
+def _count_projects(query) -> int:
+    return query.order_by(None).with_entities(func.count(ResearchProject.id)).scalar() or 0
 
 
 def _build_target_filter(target: str):
@@ -184,6 +206,36 @@ def _build_search_query(db: Session, q_normalized: str):
     return query
 
 
+def _project_search_text(item: ResearchProject) -> str:
+    keywords = item.keywords or []
+    if isinstance(keywords, list):
+        keyword_text = " ".join(str(keyword) for keyword in keywords)
+    else:
+        keyword_text = str(keywords)
+
+    return " ".join(
+        value or ""
+        for value in [
+            item.title,
+            item.author,
+            item.abstract,
+            item.field,
+            item.document_type,
+            item.target_audience,
+            keyword_text,
+        ]
+    )
+
+
+def _matches_normalized_query(item: ResearchProject, q_normalized: str) -> bool:
+    keywords = [keyword for keyword in q_normalized.split() if keyword]
+    if not keywords:
+        return True
+
+    normalized_text = normalize_query(_project_search_text(item))
+    return q_normalized in normalized_text or all(keyword in normalized_text for keyword in keywords)
+
+
 # ────────────────────────────────────────────────────
 # Endpoints
 # ────────────────────────────────────────────────────
@@ -212,6 +264,23 @@ def search_projects(
     """
     if q:
         q_normalized = normalize_query(q)
+
+        if db.bind and db.bind.dialect.name == "sqlite":
+            query = _project_list_query(db)
+            query = _apply_base_filters(query, doc_type=type, field=field, target=target, year=year)
+            query = query.order_by(ResearchProject.year.desc())
+            matched_results = [
+                item for item in query.all()
+                if _matches_normalized_query(item, q_normalized)
+            ]
+            total_count = len(matched_results)
+            items = [_to_project_item(item) for item in matched_results[offset:offset + limit]]
+
+            SEARCH_REQUESTS.labels(status="found" if total_count > 0 else "empty").inc()
+            SEARCH_RESULTS.observe(total_count)
+
+            return SearchResponse(data=SearchData(total=total_count, items=items))
+
         search_query = _build_search_query(db, q_normalized)
 
         if search_query is None:
@@ -242,11 +311,11 @@ def search_projects(
         return SearchResponse(data=SearchData(total=total_count, items=items))
 
     # Không có query → trả về tất cả (có filter)
-    query = db.query(ResearchProject)
+    query = _project_list_query(db)
     query = _apply_base_filters(query, doc_type=type, field=field, target=target, year=year)
     query = query.order_by(ResearchProject.year.desc())
 
-    total_count = query.count()
+    total_count = _count_projects(query)
     results = query.offset(offset).limit(limit).all()
     items = [_to_project_item(item) for item in results]
 

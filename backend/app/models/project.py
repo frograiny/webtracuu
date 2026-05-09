@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, JSON, Computed, Index  # type: ignore
 from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy.orm import deferred  # type: ignore
 from app.db.session import Base
 
 
@@ -19,9 +20,11 @@ class ResearchProject(Base):
     implementation_year = Column(Integer, nullable=True)
 
     # --- Cột chuẩn hóa cho tìm kiếm nhanh (pre-computed, indexed) ---
-    search_vector = Column(
-        TSVECTOR, 
-        Computed("setweight(to_tsvector('simple', unaccent(coalesce(title, ''))), 'A') || setweight(to_tsvector('simple', unaccent(coalesce(author, ''))), 'C')", persisted=True)
+    search_vector = deferred(
+        Column(
+            TSVECTOR,
+            Computed("setweight(to_tsvector('simple', unaccent(coalesce(title, ''))), 'A') || setweight(to_tsvector('simple', unaccent(coalesce(author, ''))), 'C')", persisted=True),
+        )
     )
 
     __table_args__ = (
