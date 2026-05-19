@@ -67,15 +67,17 @@ def client(db):
 
 @pytest.fixture
 def admin_user(db):
-    user = User(
-        id="test-admin-id",
-        email="admin@test.com",
-        full_name="Test Admin",
-        hashed_password=get_password_hash("admin123"),
-        role="admin",
-        is_active=True,
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    user = db.query(User).filter(User.email == "admin@test.com").first()
+    if not user:
+        user = User(
+            id="test-admin-id",
+            email="admin@test.com",
+            full_name="Test Admin",
+            hashed_password=get_password_hash("admin123"),
+            role="admin",
+            is_active=True,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
     return user
