@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Báo Cáo Phân Tích Thiết Kế Hệ Thống - VNU Research Repository</title>
+<link rel="stylesheet" href="bao_cao_pttkht.css">
+</head>
+<body>
+<!-- COVER -->
+<div class="cover">
+<span class="badge">System Analysis &amp; Design Report</span>
+<h1>Phân Tích &amp; Thiết Kế Hệ Thống</h1>
+<p class="subtitle">VNU Research Repository — Enterprise Edition<br>Hệ thống tra cứu đề tài Nghiên cứu Khoa học</p>
+<div class="meta">
+<span>📅 Tháng 5, 2026</span>
+<span>📄 Báo cáo Sơ khảo</span>
+<span>🏫 VNU University</span>
+</div>
+</div>
+
+<div class="page">
+
+<!-- TOC -->
+<div class="toc">
+<h3>📑 Mục Lục</h3>
+<ol>
+<li><a href="#ch1">Tổng Quan &amp; Bối Cảnh Dự Án</a></li>
+<li><a href="#ch2">Phân Tích Yêu Cầu Hệ Thống</a></li>
+<li><a href="#ch3">Thiết Kế Kiến Trúc Hệ Thống</a></li>
+<li><a href="#ch4">Thiết Kế Cơ Sở Dữ Liệu</a></li>
+<li><a href="#ch5">Thiết Kế Chi Tiết Các Phân Hệ</a></li>
+<li><a href="#ch6">Tổng Kết &amp; Định Hướng Tương Lai</a></li>
+</ol>
+</div>
+
+<div class="divider"></div>
+
+<!-- CHƯƠNG 1 -->
+<h2 id="ch1">Chương 1. Tổng Quan &amp; Bối Cảnh Dự Án</h2>
+
+<h3><span class="num">1</span> Bối cảnh thực tế</h3>
+<p>Trong kỷ nguyên số hóa, số lượng đề tài nghiên cứu khoa học (NCKH), luận văn, luận án và các bài báo khoa học tại các trường đại học ngày càng gia tăng theo cấp số nhân. Tuy nhiên, việc quản lý và tra cứu các tài liệu này hiện đang vấp phải nhiều rào cản nghiêm trọng:</p>
+
+<div class="card accent">
+<h4>❌ Các vấn đề của hệ thống cũ</h4>
+<ul>
+<li><strong>Phân tán dữ liệu:</strong> Dữ liệu lưu trữ rải rác ở nhiều khoa, viện, không có kho lưu trữ tập trung (Centralized Repository).</li>
+<li><strong>Hạn chế tìm kiếm:</strong> Sử dụng <code>LIKE '%keyword%'</code> dẫn đến tốc độ O(N) — quét toàn bảng. Không nhận diện được lỗi gõ sai, thiếu dấu, từ đồng nghĩa.</li>
+<li><strong>Thiếu khả năng mở rộng:</strong> Kiến trúc Monolith không thể chịu tải lớn (High Traffic) trong mùa bảo vệ luận văn.</li>
+<li><strong>Bảo mật lỏng lẻo:</strong> Thiếu RBAC, Session Management chặt chẽ, dễ bị Brute-force hoặc DDoS.</li>
+</ul>
+</div>
+
+<h3><span class="num">2</span> Mục tiêu dự án</h3>
+<p>Dự án "VNU Research Repository" được sinh ra để giải quyết triệt để các vấn đề trên, nâng cấp từ Prototype thành hệ thống chuẩn Enterprise Production.</p>
+<div class="stats">
+<div class="stat"><div class="value">&lt;100ms</div><div class="label">Search Latency</div></div>
+<div class="stat"><div class="value">99.9%</div><div class="label">Uptime Target</div></div>
+<div class="stat"><div class="value">Scale-out</div><div class="label">Horizontal Scaling</div></div>
+<div class="stat"><div class="value">24/7</div><div class="label">Observability</div></div>
+</div>
+
+<h3><span class="num">3</span> Phạm vi dự án</h3>
+<ol>
+<li>Cổng tra cứu dành cho người dùng cuối (Sinh viên, Giảng viên).</li>
+<li>Trang quản trị (Admin Dashboard) để quản lý vòng đời đề tài NCKH.</li>
+<li>Hệ thống API Backend giao tiếp với các client.</li>
+<li>Cơ sở hạ tầng lưu trữ và caching tối ưu.</li>
+</ol>
+
+<div class="divider"></div>
+
+<!-- CHƯƠNG 2 -->
+<h2 id="ch2">Chương 2. Phân Tích Yêu Cầu Hệ Thống</h2>
+
+<h3><span class="num">1</span> Yêu cầu chức năng (Functional Requirements)</h3>
+<p>Yêu cầu chức năng định nghĩa những gì hệ thống <em>phải làm</em>, được chia theo tác nhân (Actor).</p>
+
+<h4>2.1.1. Nhóm người dùng khách (Guest)</h4>
+<div class="card green">
+<table>
+<thead><tr><th>Mã UC</th><th>Tên Use Case</th><th>Mô tả</th></tr></thead>
+<tbody>
+<tr><td><span class="tag green">UC01</span></td><td>Tìm kiếm cơ bản</td><td>Nhập từ khóa tìm kiếm đề tài đã công bố (Public)</td></tr>
+<tr><td><span class="tag green">UC02</span></td><td>Lọc dữ liệu</td><td>Lọc theo năm, lĩnh vực, khoa, loại hình nghiên cứu</td></tr>
+<tr><td><span class="tag green">UC03</span></td><td>Xem chi tiết</td><td>Xem Abstract và Metadata (không tải toàn văn)</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>2.1.2. Nhóm người dùng đã xác thực (Sinh viên / Giảng viên)</h4>
+<div class="card cyan">
+<table>
+<thead><tr><th>Mã UC</th><th>Tên Use Case</th><th>Mô tả</th></tr></thead>
+<tbody>
+<tr><td><span class="tag cyan">UC04</span></td><td>Đăng nhập / Đăng xuất</td><td>Xác thực bằng tài khoản nhà trường cấp</td></tr>
+<tr><td><span class="tag cyan">UC05</span></td><td>Xem toàn văn</td><td>Xem và tải Full-text PDF của đề tài</td></tr>
+<tr><td><span class="tag cyan">UC06</span></td><td>Đề xuất đề tài mới</td><td>Nộp đề cương/đề tài mới chờ phê duyệt</td></tr>
+<tr><td><span class="tag cyan">UC07</span></td><td>Lưu trữ yêu thích</td><td>Bookmark đề tài quan tâm để xem lại</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>2.1.3. Nhóm quản trị viên (Administrator)</h4>
+<div class="card pink">
+<table>
+<thead><tr><th>Mã UC</th><th>Tên Use Case</th><th>Mô tả</th></tr></thead>
+<tbody>
+<tr><td><span class="tag pink">UC08</span></td><td>Quản lý người dùng</td><td>Thêm, sửa, xóa, khóa tài khoản, phân quyền</td></tr>
+<tr><td><span class="tag pink">UC09</span></td><td>Phê duyệt đề tài</td><td>Workflow: Pending → Approved / Rejected</td></tr>
+<tr><td><span class="tag pink">UC10</span></td><td>Quản lý danh mục</td><td>Tags, Categories, Synonyms dictionary</td></tr>
+<tr><td><span class="tag pink">UC11</span></td><td>Báo cáo thống kê</td><td>Biểu đồ truy cập, Top trending searches</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3><span class="num">2</span> Yêu cầu phi chức năng (Non-Functional Requirements)</h3>
+<div class="card amber">
+<h4>⚡ Hiệu năng (Performance)</h4>
+<ul>
+<li>Search Latency &lt; 100ms ở P95 với tải 1000 RPS</li>
+<li>API CRUD thông thường &lt; 50ms</li>
+</ul>
+<h4>🛡️ Độ tin cậy &amp; Khả dụng</h4>
+<ul>
+<li>Uptime 99.9%</li>
+<li>Auto-healing khi dịch vụ crash (Docker/K8s healthchecks)</li>
+</ul>
+<h4>📈 Khả năng mở rộng</h4>
+<ul>
+<li>Backend Stateless → dễ scale-out với Load Balancer</li>
+<li>Session &amp; Cache lưu tập trung tại Redis</li>
+</ul>
+<h4>🔒 Bảo mật</h4>
+<ul>
+<li>TLS/SSL cho mọi giao tiếp</li>
+<li>Chống OWASP Top 10 (SQL Injection, XSS, CSRF)</li>
+<li>Mật khẩu băm bằng bcrypt</li>
+</ul>
+</div>
+
+<div class="divider"></div>
+
+<!-- CHƯƠNG 3 -->
+<h2 id="ch3">Chương 3. Thiết Kế Kiến Trúc Hệ Thống</h2>
+
+<h3><span class="num">1</span> Sơ đồ Kiến trúc Tổng thể (High-Level Architecture)</h3>
+<p>Hệ thống được thiết kế theo hướng dịch vụ (Service-Oriented Architecture — SOA) kết hợp đóng gói Container, làm tiền đề cho Microservices.</p>
+
+<div class="diagram">
+<div class="title">🏗️ System Architecture Overview</div>
+<div class="flow-row">
+<div class="flow-step">🌐 Web Browser (React/Vite)</div>
+<div class="flow-step">📱 Mobile App</div>
+</div>
+<div class="arch-arrow">⬇️ HTTPS / REST</div>
+<div class="flow-row">
+<div class="flow-step active">🛡️ WAF / Nginx Load Balancer</div>
+</div>
+<div class="arch-arrow">⬇️ Load Balancing</div>
+<div class="arch-grid">
+<div class="arch-box highlight"><div class="label">FastAPI</div>API Gateway</div>
+<div class="arch-box"><div class="label">Auth Module</div>JWT + Blacklist</div>
+<div class="arch-box"><div class="label">Search Module</div>FTS Engine</div>
+</div>
+<div class="arch-arrow">⬇️ Read / Write</div>
+<div class="arch-grid" style="grid-template-columns:1fr 1fr">
+<div class="arch-box"><div class="label">🐘 PostgreSQL</div>Primary DB + FTS</div>
+<div class="arch-box"><div class="label">🔴 Redis</div>Cache + Blacklist</div>
+</div>
+<div class="arch-arrow">⬇️ Metrics Scraping</div>
+<div class="arch-grid" style="grid-template-columns:1fr 1fr">
+<div class="arch-box"><div class="label">📊 Prometheus</div>Time-series DB</div>
+<div class="arch-box"><div class="label">📈 Grafana</div>Dashboards</div>
+</div>
+</div>
+
+<h3><span class="num">2</span> Lựa chọn Công nghệ (Technology Stack)</h3>
+<table>
+<thead><tr><th>Thành phần</th><th>Công nghệ</th><th>Lý do lựa chọn</th></tr></thead>
+<tbody>
+<tr><td><span class="tag purple">Frontend</span></td><td>React + Vite + TypeScript</td><td>Hệ sinh thái phong phú, build siêu tốc, type-safe giảm lỗi runtime</td></tr>
+<tr><td><span class="tag green">Backend</span></td><td>Python + FastAPI</td><td>Async/await với uvloop, hiệu năng ngang Go/Node, tự động sinh Swagger UI</td></tr>
+<tr><td><span class="tag cyan">Database</span></td><td>PostgreSQL</td><td>RDBMS mạnh nhất, tích hợp sẵn FTS (TSVECTOR) + pg_trgm, giảm chi phí hạ tầng</td></tr>
+<tr><td><span class="tag amber">Cache</span></td><td>Redis</td><td>In-memory microsecond R/W, TTL tự động, phù hợp Rate Limiting &amp; Token Blacklist</td></tr>
+<tr><td><span class="tag pink">Monitoring</span></td><td>Prometheus + Grafana</td><td>Chuẩn công nghiệp Cloud-native, time-series metrics + trực quan hóa</td></tr>
+</tbody>
+</table>
+
+<div class="divider"></div>
+
+<!-- CHƯƠNG 4 -->
+<h2 id="ch4">Chương 4. Thiết Kế Cơ Sở Dữ Liệu</h2>
+
+<h3><span class="num">1</span> Sơ đồ Quan hệ Thực thể (ERD)</h3>
+
+<div class="diagram">
+<div class="title">📐 Entity Relationship Diagram</div>
+<div class="arch-grid" style="grid-template-columns:1fr 1fr 1fr;gap:16px">
+
+<div class="arch-box" style="text-align:left">
+<div class="label">👤 USERS</div>
+<code style="font-size:.72rem;display:block;margin-top:8px;line-height:1.8">
+id: UUID (PK)<br>
+username: VARCHAR<br>
+email: VARCHAR<br>
+hashed_password: VARCHAR<br>
+role: VARCHAR (Admin/User)<br>
+is_active: BOOLEAN<br>
+created_at: TIMESTAMP
+</code>
+</div>
+
+<div class="arch-box" style="text-align:left">
+<div class="label">📄 PROJECTS</div>
+<code style="font-size:.72rem;display:block;margin-top:8px;line-height:1.8">
+id: UUID (PK)<br>
+user_id: UUID (FK → USERS)<br>
+title: VARCHAR<br>
+author: VARCHAR<br>
+abstract: TEXT<br>
+status: VARCHAR<br>
+search_vector: TSVECTOR<br>
+created_at: TIMESTAMP
+</code>
+</div>
+
+<div class="arch-box" style="text-align:left">
+<div class="label">🏷️ TAGS</div>
+<code style="font-size:.72rem;display:block;margin-top:8px;line-height:1.8">
+id: INT (PK)<br>
+name: VARCHAR
+</code>
+<br>
+<div class="label" style="margin-top:12px">🔗 PROJECT_TAGS</div>
+<code style="font-size:.72rem;display:block;margin-top:8px;line-height:1.8">
+project_id: UUID (FK)<br>
+tag_id: INT (FK)
+</code>
+</div>
+
+</div>
+<p style="color:var(--text-muted);font-size:.78rem;margin-top:12px">
+USERS ──(1:N)──▶ PROJECTS ──(M:N)──▶ TAGS (qua bảng trung gian PROJECT_TAGS)
+</p>
+</div>
+
+<h3><span class="num">2</span> Chiến lược Indexing</h3>
+<p>Để đảm bảo hiệu năng hàng triệu bản ghi, việc thiết kế Index là yếu tố sống còn.</p>
+
+<div class="card accent">
+<h4>Cột <code>search_vector</code> (Generated Column)</h4>
+<p>Bất cứ khi nào <code>title</code>, <code>author</code>, hoặc <code>abstract</code> được INSERT/UPDATE, PostgreSQL tự động tính toán lại cột này qua hàm phân tích từ vựng (Lexer/Stemmer) — loại bỏ Stopwords và đưa từ về gốc.</p>
+</div>
+
+<table>
+<thead><tr><th>Loại Index</th><th>Áp dụng</th><th>Mục đích</th></tr></thead>
+<tbody>
+<tr>
+<td><span class="tag green">B-Tree</span></td>
+<td><code>status</code>, <code>created_at</code></td>
+<td>Lọc dữ liệu nhanh (Equality &amp; Range)</td>
+</tr>
+<tr>
+<td><span class="tag purple">GIN</span></td>
+<td><code>search_vector</code></td>
+<td>Inverted Index cho FTS — giảm O(N) → O(log N)</td>
+</tr>
+<tr>
+<td><span class="tag amber">GIN Trigram</span></td>
+<td><code>title</code> (gin_trgm_ops)</td>
+<td>Fuzzy Search — tìm kiếm mờ khi gõ sai chính tả</td>
+</tr>
+</tbody>
+</table>
+
+<pre><code>-- B-Tree Index
+CREATE INDEX idx_projects_status ON projects(status);
+
+-- GIN Index cho Full-Text Search
+CREATE INDEX idx_projects_search ON projects USING GIN(search_vector);
+
+-- Trigram Index cho Fuzzy Search
+CREATE INDEX idx_projects_title_trgm ON projects USING GIN(title gin_trgm_ops);</code></pre>
+
+<div class="divider"></div>
+
+<!-- CHƯƠNG 5 -->
+<h2 id="ch5">Chương 5. Thiết Kế Chi Tiết Các Phân Hệ Cốt Lõi</h2>
+
+<h3><span class="num">1</span> Phân hệ Tra Cứu Nâng Cao (Search Engine)</h3>
+<p><strong>Vấn đề:</strong> Câu lệnh <code>LIKE '%...%'</code> khiến DB bị thắt cổ chai (Bottleneck).<br>
+<strong>Giải pháp:</strong> Áp dụng luồng xử lý Search Engine ngay trong PostgreSQL.</p>
+
+<div class="diagram">
+<div class="title">🔍 Search Flow — Sequence Diagram</div>
+<div class="flow-row"><div class="flow-step">① User gửi: <code>GET /search?q=Tri tue nhan tao</code></div></div>
+<div class="arch-arrow">⬇️</div>
+<div class="flow-row"><div class="flow-step active">② Normalizer: xóa khoảng trắng, lowercase, synonym rewrite → "ai"</div></div>
+<div class="arch-arrow">⬇️</div>
+<div class="flow-row"><div class="flow-step">③ Kiểm tra Redis: <code>GET search_cache:q:ai</code></div></div>
+<div class="arch-arrow">⬇️</div>
+<div class="arch-grid" style="grid-template-columns:1fr 1fr">
+<div class="arch-box highlight" style="border-color:var(--green)">
+<div class="label" style="color:var(--green)">✅ Cache Hit</div>
+Trả kết quả ngay<br><strong>Latency: ~2ms</strong>
+</div>
+<div class="arch-box" style="border-color:var(--amber)">
+<div class="label" style="color:var(--amber)">❌ Cache Miss</div>
+Query FTS bằng GIN Index<br>Lưu kết quả vào Redis (TTL: 1h)<br><strong>Latency: ~50ms</strong>
+</div>
+</div>
+</div>
+
+<div class="card accent">
+<h4>Thuật toán Xếp hạng (Ranking)</h4>
+<table>
+<thead><tr><th>Trường</th><th>Trọng số</th><th>Mức ưu tiên</th></tr></thead>
+<tbody>
+<tr><td>Title</td><td><span class="tag purple">Weight A</span></td><td>Cao nhất</td></tr>
+<tr><td>Author</td><td><span class="tag cyan">Weight B</span></td><td>Trung bình</td></tr>
+<tr><td>Abstract</td><td><span class="tag amber">Weight C</span></td><td>Thấp</td></tr>
+</tbody>
+</table>
+<p>Kết quả sắp xếp theo hàm <code>ts_rank()</code> kết hợp <code>setweight()</code> của PostgreSQL.</p>
+</div>
+
+<h3><span class="num">2</span> Chiến Lược Bộ Đệm (Cache-Aside Pattern)</h3>
+
+<div class="card green">
+<h4>Bài toán Nhất quán dữ liệu (Data Consistency)</h4>
+<p>Nếu Admin sửa tiêu đề đề tài nhưng Redis vẫn lưu dữ liệu cũ → người dùng thấy thông tin sai.</p>
+<h4>Giải pháp: Event-driven Cache Invalidation</h4>
+<ol>
+<li>Transaction commit thành công vào DB</li>
+<li>FastAPI đẩy <code>Background Task</code></li>
+<li>Task dùng <code>SCAN</code> tìm tất cả keys <code>search_cache:*</code> → <code>DEL</code></li>
+<li>Lần search tiếp → Cache Miss → DB trả dữ liệu mới → nạp lại cache</li>
+</ol>
+</div>
+
+<h3><span class="num">3</span> Phân hệ Bảo mật (Enterprise Security Auth)</h3>
+
+<div class="card cyan">
+<h4>🔐 Dual-Token Lifecycle</h4>
+<table>
+<thead><tr><th>Token</th><th>Tuổi thọ</th><th>Lưu trữ</th><th>Mục đích</th></tr></thead>
+<tbody>
+<tr><td><span class="tag purple">Access Token</span></td><td>15-30 phút</td><td>Header Authorization</td><td>Cấp quyền tức thời cho mỗi API call</td></tr>
+<tr><td><span class="tag green">Refresh Token</span></td><td>7-30 ngày</td><td>HTTPOnly Cookie</td><td>Cấp mới Access Token (chống XSS)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="diagram">
+<div class="title">🛡️ Token Revocation Flow</div>
+<div class="flow-row"><div class="flow-step">① Client gửi HTTP Request + JWT Token</div></div>
+<div class="arch-arrow">⬇️</div>
+<div class="flow-row"><div class="flow-step active">② Auth Middleware giải mã JWT, trích xuất JTI</div></div>
+<div class="arch-arrow">⬇️</div>
+<div class="flow-row"><div class="flow-step">③ Kiểm tra Redis: <code>EXISTS blacklist:{jti}</code></div></div>
+<div class="arch-arrow">⬇️</div>
+<div class="arch-grid" style="grid-template-columns:1fr 1fr">
+<div class="arch-box" style="border-color:var(--red)">
+<div class="label" style="color:var(--red)">⛔ Tồn tại trong Blacklist</div>
+→ 401 Unauthorized (Token Revoked)
+</div>
+<div class="arch-box" style="border-color:var(--green)">
+<div class="label" style="color:var(--green)">✅ Hợp lệ</div>
+→ Cho phép truy cập Controller
+</div>
+</div>
+</div>
+
+<div class="card amber">
+<h4>⚡ Smart Rate Limiting (Token Bucket via Redis)</h4>
+<table>
+<thead><tr><th>Loại người dùng</th><th>Key định danh</th><th>Giới hạn</th></tr></thead>
+<tbody>
+<tr><td>Đã đăng nhập</td><td><code>user_id</code> từ JWT</td><td>100 req/phút</td></tr>
+<tr><td>Khách (Guest)</td><td><code>Hash(IP + User-Agent)</code></td><td>30 req/phút</td></tr>
+</tbody>
+</table>
+<p>Dùng <code>IP + User-Agent</code> để phân biệt thiết bị đằng sau cùng NAT/Wifi chung.</p>
+</div>
+
+<h3><span class="num">4</span> Phân hệ Vận hành &amp; Giám sát (Observability)</h3>
+
+<div class="card pink">
+<h4>📊 Prometheus Metrics</h4>
+<p>Tích hợp <code>prometheus-fastapi-instrumentator</code> tự động intercept mọi Request/Response:</p>
+<ul>
+<li><code>HTTP_REQUESTS_TOTAL</code> — Tổng số lượng request</li>
+<li><code>HTTP_REQUEST_DURATION_SECONDS</code> — Histogram đo Latency (P50, P95, P99)</li>
+</ul>
+
+<h4>📈 Grafana Business Analytics</h4>
+<ul>
+<li>Lưu lượng tìm kiếm theo thời gian thực</li>
+<li>Từ khóa "Zero-result" → Admin thêm dữ liệu hoặc từ đồng nghĩa</li>
+</ul>
+
+<h4>🐳 Docker Auto-healing</h4>
+<p>Docker Daemon ping <code>/health</code> mỗi 30s. Nếu fail 3 lần liên tiếp → tự động KILL &amp; RESTART container → đảm bảo High Availability.</p>
+</div>
+
+<div class="divider"></div>
+
+<!-- CHƯƠNG 6 -->
+<h2 id="ch6">Chương 6. Tổng Kết &amp; Định Hướng Tương Lai</h2>
+
+<h3><span class="num">1</span> Đánh giá kết quả</h3>
+<p>Qua 4 giai đoạn tái cấu trúc, dự án <strong>VNU Research Repository (Enterprise Edition)</strong> đã lột xác thành công — vượt qua giới hạn của một ứng dụng CRUD đơn thuần để trở thành hệ thống phân tán, chịu tải cao, sở hữu các lõi kỹ thuật tiên tiến.</p>
+
+<div class="stats">
+<div class="stat"><div class="value">FTS</div><div class="label">Advanced Search</div></div>
+<div class="stat"><div class="value">Redis</div><div class="label">Distributed Cache</div></div>
+<div class="stat"><div class="value">JWT</div><div class="label">Dual-Token Auth</div></div>
+<div class="stat"><div class="value">Docker</div><div class="label">Containerized</div></div>
+</div>
+
+<h3><span class="num">2</span> Hướng phát triển tương lai</h3>
+<div class="card accent">
+<ol>
+<li><strong>AI / Machine Learning:</strong> Tích hợp NLP (BERT) để đề xuất bài báo liên quan (Recommendation System) dựa trên nội dung đọc, thay vì chỉ từ khóa.</li>
+<li><strong>Elasticsearch Migration:</strong> Khi dữ liệu vượt hàng chục triệu bản ghi, dễ dàng đồng bộ CDC sang cụm Elasticsearch chuyên dụng nhờ kiến trúc rời rạc.</li>
+<li><strong>Kubernetes (K8S):</strong> Đóng gói Docker Compose thành Helm Chart để triển khai Cloud (AWS/GCP), đạt Auto-scaling tự động.</li>
+</ol>
+</div>
+
+<div class="divider"></div>
+<p style="text-align:center;color:var(--text-muted);font-size:.82rem;padding:24px 0">
+— Hết báo cáo — <br>
+<em>VNU Research Repository • Enterprise Edition • 2026</em>
+</p>
+
+</div>
+</body>
+</html>
