@@ -29,8 +29,10 @@ conn = psycopg2.connect(os.environ['DATABASE_URL'])
 cursor = conn.cursor()
 cursor.execute('CREATE EXTENSION IF NOT EXISTS unaccent;')
 cursor.execute('CREATE EXTENSION IF NOT EXISTS pg_trgm;')
+conn.commit()
 try:
     cursor.execute('ALTER FUNCTION unaccent(text) IMMUTABLE;')
+    conn.commit()
     print('  Successfully altered built-in unaccent to IMMUTABLE.')
 except Exception as e:
     print(f'  Skipped altering built-in unaccent (insufficient privileges). Creating public.immutable_unaccent wrapper instead...')
