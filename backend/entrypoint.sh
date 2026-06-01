@@ -29,11 +29,17 @@ conn = psycopg2.connect(os.environ['DATABASE_URL'])
 cursor = conn.cursor()
 cursor.execute('CREATE EXTENSION IF NOT EXISTS unaccent;')
 cursor.execute('CREATE EXTENSION IF NOT EXISTS pg_trgm;')
-cursor.execute('ALTER FUNCTION unaccent(text) IMMUTABLE;')
+try:
+    cursor.execute('ALTER FUNCTION unaccent(text) IMMUTABLE;')
+    print('  Successfully altered built-in unaccent to IMMUTABLE.')
+except Exception as e:
+    print(f'  Skipped altering built-in unaccent (insufficient privileges). Creating public.immutable_unaccent wrapper instead...')
+    conn.rollback()
+cursor.execute(\"CREATE OR REPLACE FUNCTION public.immutable_unaccent(text) RETURNS text AS 'SELECT public.unaccent(\$1)' LANGUAGE sql IMMUTABLE;\")
 conn.commit()
 cursor.close()
 conn.close()
-print('Extensions enabled!')
+print('Extensions and immutable_unaccent wrapper configured successfully!')
 "
 
 # Chạy migration (tạo bảng nếu chưa có)

@@ -26,8 +26,8 @@ def upgrade() -> None:
     op.execute("""
         ALTER TABLE research_projects
         ADD COLUMN search_vector tsvector GENERATED ALWAYS AS (
-            setweight(to_tsvector('simple', unaccent(coalesce(title, ''))), 'A') || 
-            setweight(to_tsvector('simple', unaccent(coalesce(author, ''))), 'C')
+            setweight(to_tsvector('simple', public.immutable_unaccent(coalesce(title, ''))), 'A') || 
+            setweight(to_tsvector('simple', public.immutable_unaccent(coalesce(author, ''))), 'C')
         ) STORED;
     """)
     op.execute("""
@@ -44,7 +44,7 @@ def downgrade() -> None:
     op.execute("""
         ALTER TABLE research_projects
         ADD COLUMN search_vector tsvector GENERATED ALWAYS AS (
-            to_tsvector('simple', unaccent(coalesce(title, '')) || ' ' || unaccent(coalesce(author, '')))
+            to_tsvector('simple', public.immutable_unaccent(coalesce(title, '')) || ' ' || public.immutable_unaccent(coalesce(author, '')))
         ) STORED;
     """)
     op.execute("""

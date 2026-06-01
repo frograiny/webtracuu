@@ -19,11 +19,10 @@ class ResearchProject(Base):
     document_type = Column(String, nullable=True)
     implementation_year = Column(Integer, nullable=True)
 
-    # --- Cột chuẩn hóa cho tìm kiếm nhanh (pre-computed, indexed) ---
     search_vector = deferred(
         Column(
             TSVECTOR,
-            Computed("setweight(to_tsvector('simple', unaccent(coalesce(title, ''))), 'A') || setweight(to_tsvector('simple', unaccent(coalesce(author, ''))), 'C')", persisted=True),
+            Computed("setweight(to_tsvector('simple', public.immutable_unaccent(coalesce(title, ''))), 'A') || setweight(to_tsvector('simple', public.immutable_unaccent(coalesce(author, ''))), 'C')", persisted=True),
         )
     )
 
