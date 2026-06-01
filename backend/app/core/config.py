@@ -22,6 +22,13 @@ class Settings(BaseSettings):
             raise ValueError("MUST change SECRET_KEY in production environment")
         return v
 
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def convert_postgres_scheme(cls, v: str) -> str:
+        if v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        return v
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
