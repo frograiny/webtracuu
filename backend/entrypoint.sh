@@ -35,7 +35,7 @@ try:
 except Exception as e:
     print(f'  Skipped altering built-in unaccent (insufficient privileges). Creating public.immutable_unaccent wrapper instead...')
     conn.rollback()
-cursor.execute(\"CREATE OR REPLACE FUNCTION public.immutable_unaccent(text) RETURNS text AS 'SELECT public.unaccent(\$1)' LANGUAGE sql IMMUTABLE;\")
+cursor.execute(\"CREATE OR REPLACE FUNCTION public.immutable_unaccent(text) RETURNS text AS 'SELECT unaccent(\$1)' LANGUAGE sql IMMUTABLE;\")
 conn.commit()
 cursor.close()
 conn.close()
