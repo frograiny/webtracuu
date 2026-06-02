@@ -8,6 +8,7 @@ export interface Project {
     status: 'Đang thực hiện' | 'Đã nghiệm thu' | 'Hoàn thành' | string;
     abstract: string;
     keywords: string[];
+    pdfLink?: string;
     createdAt?: string;
     updatedAt?: string;
     ai_relevance_score?: number;

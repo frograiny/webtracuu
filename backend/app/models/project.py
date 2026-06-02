@@ -18,6 +18,7 @@ class ResearchProject(Base):
     keywords = Column(JSON, default=[])  # Từ khóa/Tags
     document_type = Column(String, nullable=True)
     implementation_year = Column(Integer, nullable=True)
+    pdf_url = Column(String, nullable=True)
 
     search_vector = deferred(
         Column(

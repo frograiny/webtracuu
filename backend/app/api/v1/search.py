@@ -87,6 +87,7 @@ def _to_project_item(item: ResearchProject) -> dict:
         "tuKhoa": item.keywords or [],
         "loaiTaiLieu": item.document_type,
         "namTrienKhai": item.implementation_year,
+        "pdfLink": item.pdf_url,
     }
 
 
@@ -104,6 +105,7 @@ def _project_list_query(db: Session):
             ResearchProject.keywords,
             ResearchProject.document_type,
             ResearchProject.implementation_year,
+            ResearchProject.pdf_url,
         )
     )
 
@@ -356,6 +358,7 @@ def create_project(
         keywords=payload.tuKhoa,
         document_type=payload.loaiTaiLieu,
         implementation_year=payload.namTrienKhai,
+        pdf_url=payload.pdfLink,
     )
     
     db.add(project)
@@ -419,6 +422,8 @@ def update_project(
         project.document_type = payload.loaiTaiLieu
     if payload.namTrienKhai is not None:
         project.implementation_year = payload.namTrienKhai
+    if payload.pdfLink is not None:
+        project.pdf_url = payload.pdfLink
     
     db.commit()
     db.refresh(project)

@@ -54,6 +54,25 @@ Base.metadata.create_all(bind=engine)
 print('Tables created/verified successfully!')
 "
 
+# Bảo đảm cột pdf_url tồn tại trong PostgreSQL (Render)
+echo "Ensuring pdf_url column exists..."
+python -c "
+import os, psycopg2
+conn = psycopg2.connect(os.environ['DATABASE_URL'])
+cursor = conn.cursor()
+try:
+    cursor.execute('ALTER TABLE research_projects ADD COLUMN IF NOT EXISTS pdf_url VARCHAR;')
+    conn.commit()
+    print('  Column pdf_url checked/created successfully!')
+except Exception as e:
+    print(f'  Failed to ensure pdf_url column: {e}')
+    conn.rollback()
+finally:
+    cursor.close()
+    conn.close()
+"
+
+
 # Seed dữ liệu mẫu nếu DB trống
 python -c "
 from app.db.session import SessionLocal

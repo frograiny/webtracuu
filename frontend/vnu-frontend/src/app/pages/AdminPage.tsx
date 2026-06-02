@@ -23,6 +23,7 @@ interface AdminProject {
   tuKhoa: string[];
   loaiTaiLieu: string;
   namTrienKhai?: number | null;
+  pdfLink?: string;
 }
 
 interface ProjectFormState {
@@ -36,6 +37,7 @@ interface ProjectFormState {
   tuKhoa: string;
   loaiTaiLieu: string;
   namTrienKhai: string;
+  pdfLink: string;
 }
 
 const emptyForm: ProjectFormState = {
@@ -49,6 +51,7 @@ const emptyForm: ProjectFormState = {
   tuKhoa: '',
   loaiTaiLieu: 'De tai NCKH',
   namTrienKhai: String(new Date().getFullYear()),
+  pdfLink: '',
 };
 
 function toForm(project: AdminProject): ProjectFormState {
@@ -63,6 +66,7 @@ function toForm(project: AdminProject): ProjectFormState {
     tuKhoa: Array.isArray(project.tuKhoa) ? project.tuKhoa.join(', ') : String(project.tuKhoa ?? ''),
     loaiTaiLieu: project.loaiTaiLieu ?? 'De tai NCKH',
     namTrienKhai: project.namTrienKhai ? String(project.namTrienKhai) : '',
+    pdfLink: project.pdfLink ?? '',
   };
 }
 
@@ -81,6 +85,7 @@ function toPayload(form: ProjectFormState) {
       .filter(Boolean),
     loaiTaiLieu: form.loaiTaiLieu.trim(),
     namTrienKhai: form.namTrienKhai ? Number(form.namTrienKhai) : null,
+    pdfLink: form.pdfLink.trim(),
   };
 }
 
@@ -97,6 +102,7 @@ function normalizeItems(items: any[]): AdminProject[] {
     tuKhoa: Array.isArray(item.tuKhoa) ? item.tuKhoa : String(item.tuKhoa ?? '').split(/\s*,\s*/).filter(Boolean),
     loaiTaiLieu: item.loaiTaiLieu,
     namTrienKhai: item.namTrienKhai,
+    pdfLink: item.pdfLink,
   }));
 }
 
@@ -340,6 +346,7 @@ export function AdminPage() {
               <input className="w-full border border-gray-300 px-3 py-2 text-sm" placeholder="Trang thai" value={form.trangThai} onChange={(event) => setForm({ ...form, trangThai: event.target.value })} />
               <input className="w-full border border-gray-300 px-3 py-2 text-sm" placeholder="Loai tai lieu" value={form.loaiTaiLieu} onChange={(event) => setForm({ ...form, loaiTaiLieu: event.target.value })} />
               <input className="w-full border border-gray-300 px-3 py-2 text-sm" placeholder="Tu khoa, cach nhau bang dau phay" value={form.tuKhoa} onChange={(event) => setForm({ ...form, tuKhoa: event.target.value })} />
+              <input className="w-full border border-gray-300 px-3 py-2 text-sm" placeholder="Link tài liệu / PDF (Google Drive, OneDrive...)" value={form.pdfLink} onChange={(event) => setForm({ ...form, pdfLink: event.target.value })} />
               <textarea className="w-full min-h-28 border border-gray-300 px-3 py-2 text-sm" placeholder="Tom tat" value={form.tomTat} onChange={(event) => setForm({ ...form, tomTat: event.target.value })} />
 
               <button type="submit" disabled={loading} className="flex w-full items-center justify-center gap-2 bg-[#0a3875] px-4 py-2 text-sm font-semibold text-white hover:bg-blue-900 disabled:opacity-60">

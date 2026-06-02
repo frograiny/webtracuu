@@ -16,6 +16,7 @@ class ProjectItem(BaseModel):
     tuKhoa: list[str] = Field(default_factory=list)
     loaiTaiLieu: str | None = None
     namTrienKhai: int | None = None
+    pdfLink: str | None = None
 
     class Config:
         from_attributes = True
@@ -33,6 +34,7 @@ class ProjectCreate(BaseModel):
     tuKhoa: list[str] = Field(default_factory=list, description="Từ khóa")
     loaiTaiLieu: str = Field(default="", description="Loại tài liệu")
     namTrienKhai: int | None = Field(default=None, ge=2000, le=2030, description="Năm triển khai")
+    pdfLink: str = Field(default="", description="Link tài liệu / PDF")
 
     @validator("tenDeTai", "chuNhiem", "linhVuc")
     def strip_whitespace(cls, v):
@@ -51,6 +53,7 @@ class ProjectUpdate(BaseModel):
     tuKhoa: list[str] | None = None
     loaiTaiLieu: str | None = None
     namTrienKhai: int | None = Field(None, ge=2000, le=2030)
+    pdfLink: str | None = None
 
     @validator("tenDeTai", "chuNhiem", "linhVuc", pre=True)
     def strip_whitespace(cls, v):

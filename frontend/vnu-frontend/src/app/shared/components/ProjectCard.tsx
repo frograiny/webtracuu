@@ -44,8 +44,8 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
                 </div>
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div className="flex gap-2 flex-wrap max-w-[80%]">
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
+                <div className="flex gap-2 flex-wrap max-w-[60%]">
                     {project.keywords && project.keywords.slice(0, 3).map((kw, idx) => (
                         <span key={idx} className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium">
                             <Tag className="w-3 h-3 mr-1" />
@@ -58,9 +58,22 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
                         </span>
                     )}
                 </div>
-                <button className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 hover:underline px-3 py-1.5 rounded-full hover:bg-blue-50 transition-colors shrink-0">
-                    Xem chi tiết <ChevronRight className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                    {project.pdfLink && (
+                        <a
+                            href={project.pdfLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors border border-emerald-200"
+                        >
+                            <FileText className="w-3.5 h-3.5" />
+                            Xem PDF
+                        </a>
+                    )}
+                    <button className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 hover:underline px-3 py-1.5 rounded-full hover:bg-blue-50 transition-colors">
+                        Xem chi tiết <ChevronRight className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
         </div>
     );
