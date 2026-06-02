@@ -52,7 +52,7 @@ export const MainLayout: FC<LayoutProps> = ({ children, showLoginPanel = true })
             
             <footer className="bg-gray-800 text-gray-400 py-10 mt-8 border-t border-gray-700">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
-                    <p className="font-semibold text-gray-300">TỬ SÁCH SỐ CÔNG TRÌNH NGHIÊN CỨU KHOA HỌC</p>
+                    <p className="font-semibold text-gray-300">TỦ SÁCH SỐ CÔNG TRÌNH NGHIÊN CỨU KHOA HỌC</p>
                     <p className="mt-1">Trường Đại học Khoa học Tự nhiên, ĐHQGHN</p>
                     <p className="mt-1 text-xs text-gray-500">334 Nguyễn Trãi, Thanh Xuân Trung, Thanh Xuân, Hà Nội</p>
                 </div>
