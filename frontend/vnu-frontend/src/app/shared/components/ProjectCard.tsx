@@ -1,4 +1,5 @@
 import React, { FC } from 'react';
+import { Link } from 'react-router-dom';
 import { FileText, Users, Calendar, Target, Tag, ChevronRight } from 'lucide-react';
 import type { Project } from '../types';
 
@@ -70,9 +71,9 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
                             Xem PDF
                         </a>
                     )}
-                    <button className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 hover:underline px-3 py-1.5 rounded-full hover:bg-blue-50 transition-colors">
+                    <Link to={`/project/${project.id}`} className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 hover:underline px-3 py-1.5 rounded-full hover:bg-blue-50 transition-colors">
                         Xem chi tiết <ChevronRight className="w-4 h-4" />
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>

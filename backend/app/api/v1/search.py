@@ -324,6 +324,20 @@ def search_projects(
     return SearchResponse(data=SearchData(total=total_count, items=items))
 
 
+@router.get("/{project_id}", response_model=ProjectDetailResponse)
+def get_project(
+    project_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Lấy thông tin chi tiết một đề tài NCKH theo ID.
+    """
+    project = db.query(ResearchProject).filter(ResearchProject.id == project_id).first()
+    if not project:
+        raise NotFoundError("Không tìm thấy đề tài")
+    return ProjectDetailResponse(data=_to_project_item(project))
+
+
 @router.post("", response_model=ProjectDetailResponse, status_code=status.HTTP_201_CREATED)
 def create_project(
     payload: ProjectCreate,
@@ -336,10 +350,10 @@ def create_project(
     
     Chỉ admin mới có quyền tạo.
     """
-    # Check duplicate title
+    # Check duplicate title - so khớp chính xác không phân biệt hoa thường
     existing = (
         db.query(ResearchProject)
-        .filter(ResearchProject.title.ilike(f"%{payload.tenDeTai}%"))
+        .filter(func.lower(ResearchProject.title) == func.lower(payload.tenDeTai))
         .first()
     )
     if existing:
@@ -393,7 +407,7 @@ def update_project(
         existing = (
             db.query(ResearchProject)
             .filter(
-                ResearchProject.title.ilike(f"%{payload.tenDeTai}%"),
+                func.lower(ResearchProject.title) == func.lower(payload.tenDeTai),
                 ResearchProject.id != project_id,
             )
             .first()
