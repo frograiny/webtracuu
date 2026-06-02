@@ -48,6 +48,7 @@ export async function searchProjects(
                     status: item.trangThai,
                     abstract: item.tomTat,
                     keywords: item.tuKhoa,
+                    pdfLink: item.pdfLink,
                 })),
                 total,
             };

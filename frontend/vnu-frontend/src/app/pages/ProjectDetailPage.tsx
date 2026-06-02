@@ -55,7 +55,19 @@ export function ProjectDetailPage() {
       try {
         const response = await axiosInstance.get(`/projects/${id}`);
         if (response.data && response.data.data) {
-          setProject(response.data.data);
+          const item = response.data.data;
+          setProject({
+            id: item.id,
+            title: item.tenDeTai,
+            author: item.chuNhiem,
+            targetAudience: item.doiTuong,
+            field: item.linhVuc,
+            year: item.namThucHien,
+            status: item.trangThai,
+            abstract: item.tomTat,
+            keywords: item.tuKhoa,
+            pdfLink: item.pdfLink,
+          });
         } else {
           setError('Không tìm thấy thông tin đề tài này.');
         }
