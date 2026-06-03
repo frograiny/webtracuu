@@ -176,32 +176,61 @@
             </div>
 
             <div class="db-schema animate-in">
+                <!-- Table 1: PostgreSQL research_projects -->
                 <div class="schema-table table-main">
-                    <div class="table-header"><span class="table-icon">📋</span><span class="table-name">research_projects</span><span class="table-badge">Bảng chính</span></div>
+                    <div class="table-header"><span class="table-icon">📋</span><span class="table-name">research_projects</span><span class="table-badge">Bảng chính (Postgres)</span></div>
                     <div class="table-columns">
                         <div class="col-row col-pk"><span class="col-key">PK</span><span class="col-name">id</span><span class="col-type">UUID</span></div>
-                        <div class="col-row"><span class="col-key"></span><span class="col-name">ten_de_tai</span><span class="col-type">VARCHAR</span></div>
-                        <div class="col-row"><span class="col-key"></span><span class="col-name">chu_nhiem</span><span class="col-type">VARCHAR</span></div>
-                        <div class="col-row"><span class="col-key"></span><span class="col-name">doi_tuong</span><span class="col-type">VARCHAR</span></div>
-                        <div class="col-row"><span class="col-key"></span><span class="col-name">linh_vuc</span><span class="col-type">VARCHAR</span></div>
-                        <div class="col-row"><span class="col-key"></span><span class="col-name">nam_thuc_hien</span><span class="col-type">INTEGER</span></div>
-                        <div class="col-row"><span class="col-key"></span><span class="col-name">trang_thai</span><span class="col-type">VARCHAR</span></div>
-                        <div class="col-row"><span class="col-key"></span><span class="col-name">tom_tat</span><span class="col-type">TEXT</span></div>
-                        <div class="col-row"><span class="col-key"></span><span class="col-name">tu_khoa</span><span class="col-type">JSON[]</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">title</span><span class="col-type">VARCHAR (Tiêu đề)</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">author</span><span class="col-type">VARCHAR (Chủ nhiệm)</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">target_audience</span><span class="col-type">VARCHAR (Đối tượng)</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">field</span><span class="col-type">VARCHAR (Lĩnh vực)</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">year</span><span class="col-type">INTEGER (Năm đăng)</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">status</span><span class="col-type">VARCHAR (Trạng thái)</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">abstract</span><span class="col-type">TEXT (Tóm tắt)</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">keywords</span><span class="col-type">JSON[] (Từ khóa)</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">document_type</span><span class="col-type">VARCHAR (Loại tài liệu)</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">implementation_year</span><span class="col-type">INTEGER (Năm thực hiện)</span></div>
                         <div class="col-row col-special" id="col-search-vector" title="Click để xem chi tiết"><span class="col-key">⚡</span><span class="col-name">search_vector</span><span class="col-type">TSVECTOR</span></div>
-                        <div class="col-row"><span class="col-key"></span><span class="col-name">pdf_url</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">pdf_url</span><span class="col-type">VARCHAR (Xem PDF)</span></div>
                     </div>
                 </div>
-                <div class="schema-relation"><svg viewBox="0 0 80 20" width="80" height="20"><line x1="0" y1="10" x2="80" y2="10" stroke="#3b82f6" stroke-width="2" stroke-dasharray="6,3"/></svg></div>
+
+                <!-- Table 2: PostgreSQL users -->
                 <div class="schema-table table-secondary">
-                    <div class="table-header"><span class="table-icon">👤</span><span class="table-name">users</span><span class="table-badge secondary">Auth</span></div>
+                    <div class="table-header"><span class="table-icon">👤</span><span class="table-name">users</span><span class="table-badge secondary">Xác thực (Postgres)</span></div>
                     <div class="table-columns">
                         <div class="col-row col-pk"><span class="col-key">PK</span><span class="col-name">id</span><span class="col-type">UUID</span></div>
-                        <div class="col-row"><span class="col-key"></span><span class="col-name">email</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">email</span><span class="col-type">VARCHAR (Độc nhất)</span></div>
                         <div class="col-row"><span class="col-key"></span><span class="col-name">full_name</span><span class="col-type">VARCHAR</span></div>
                         <div class="col-row"><span class="col-key"></span><span class="col-name">hashed_password</span><span class="col-type">VARCHAR</span></div>
-                        <div class="col-row"><span class="col-key"></span><span class="col-name">role</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">role</span><span class="col-type">VARCHAR (admin / user)</span></div>
                         <div class="col-row"><span class="col-key"></span><span class="col-name">is_active</span><span class="col-type">BOOLEAN</span></div>
+                    </div>
+                </div>
+
+                <!-- Table 3: Redis Key-Value Store -->
+                <div class="schema-table table-redis">
+                    <div class="table-header" style="background: #fee2e2; border-bottom: 1px solid #fca5a5;"><span class="table-icon">⚡</span><span class="table-name" style="color: #991b1b;">Redis Key-Value</span><span class="table-badge" style="background: #fca5a5; color: #991b1b; border: 1px solid #f87171;">Cache & State</span></div>
+                    <div class="table-columns">
+                        <div class="col-row" style="background: #fef2f2;"><span class="col-key" style="color: #ef4444;">KEY</span><span class="col-name">search_cache:&lt;q&gt;</span><span class="col-type">String (JSON, TTL: 5p)</span></div>
+                        <div class="col-row"><span class="col-key" style="color: #94a3b8;">VAL</span><span class="col-name">Kết quả tìm kiếm cache</span><span class="col-type">Lưu dữ liệu FTS</span></div>
+                        <div class="col-row" style="background: #fef2f2;"><span class="col-key" style="color: #ef4444;">KEY</span><span class="col-name">blacklist:&lt;jti&gt;</span><span class="col-type">String ("1", TTL: JWT)</span></div>
+                        <div class="col-row"><span class="col-key" style="color: #94a3b8;">VAL</span><span class="col-name">Token đã đăng xuất</span><span class="col-type">Chống sử dụng lại</span></div>
+                        <div class="col-row" style="background: #fef2f2;"><span class="col-key" style="color: #ef4444;">KEY</span><span class="col-name">rate_limit:&lt;ip&gt;</span><span class="col-type">Integer (TTL: 1p)</span></div>
+                        <div class="col-row"><span class="col-key" style="color: #94a3b8;">VAL</span><span class="col-name">Số lượng request</span><span class="col-type">Chặn brute force / DDoS</span></div>
+                    </div>
+                </div>
+
+                <!-- Table 4: PostgreSQL Extensions & Helpers -->
+                <div class="schema-table table-extensions">
+                    <div class="table-header" style="background: #ecfeff; border-bottom: 1px solid #a5f3fc;"><span class="table-icon">⚙️</span><span class="table-name" style="color: #0e7490;">Extensions & Helpers</span><span class="table-badge" style="background: #a5f3fc; color: #0e7490; border: 1px solid #22d3ee;">Config</span></div>
+                    <div class="table-columns">
+                        <div class="col-row" style="background: #ecfeff;"><span class="col-key" style="color: #06b6d4;">EXT</span><span class="col-name">pg_trgm</span><span class="col-type">Similarity Fuzzy Search</span></div>
+                        <div class="col-row"><span class="col-key" style="color: #06b6d4;">EXT</span><span class="col-name">unaccent</span><span class="col-type">Bỏ dấu tiếng Việt</span></div>
+                        <div class="col-row" style="background: #ecfeff;"><span class="col-key" style="color: #06b6d4;">FUNC</span><span class="col-name">immutable_unaccent</span><span class="col-type">Bỏ dấu cho generated col</span></div>
+                        <div class="col-row"><span class="col-key" style="color: #06b6d4;">IDX</span><span class="col-name">gin_search_vector</span><span class="col-type">GIN Index trên tsvector</span></div>
+                        <div class="col-row" style="background: #ecfeff;"><span class="col-key" style="color: #06b6d4;">IDX</span><span class="col-name">gin_trgm_title</span><span class="col-type">GIN Trigram Index trên title</span></div>
                     </div>
                 </div>
             </div>
