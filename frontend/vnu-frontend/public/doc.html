@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VNU Research Repository — Kiến Trúc Hệ Thống</title>
+    <meta name="description" content="Tài liệu giải thích kiến trúc hệ thống VNU Research Repository - Backend, Database, Search Engine, API">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="doc-assets/style.css">
+</head>
+<body>
+    <!-- Particle canvas -->
+    <canvas id="particles"></canvas>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-brand">
+            <div class="nav-logo">
+                <svg viewBox="0 0 32 32" width="26" height="26"><circle cx="16" cy="16" r="14" fill="none" stroke="#2563eb" stroke-width="2.5"/><path d="M10 16l4 4 8-8" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span>VNU Docs</span>
+        </div>
+        <div class="nav-links">
+            <a href="#hero" class="nav-link active">Tổng quan</a>
+            <a href="#architecture" class="nav-link">Kiến trúc</a>
+            <a href="#database" class="nav-link">Database</a>
+            <a href="#search" class="nav-link">Search</a>
+            <a href="#api" class="nav-link">API</a>
+            <a href="#auth" class="nav-link">Auth</a>
+            <a href="#devops" class="nav-link">DevOps</a>
+        </div>
+    </nav>
+
+    <!-- ====== HERO ====== -->
+    <section id="hero" class="section hero-section">
+        <div class="hero-content">
+            <div class="hero-badge animate-in"><span class="badge-dot"></span>Tài liệu Kỹ thuật Nội bộ</div>
+            <h1 class="hero-title animate-in"><span class="gradient-text">VNU Research</span><br>Repository</h1>
+            <p class="hero-subtitle animate-in">Hệ thống tra cứu đề tài NCKH — Giải thích cơ chế hoạt động, luồng logic và kiến trúc kỹ thuật cho người phát triển tiếp theo.</p>
+            <div class="hero-stats animate-in">
+                <div class="stat-card">
+                    <div class="stat-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+                    <div class="stat-info"><span class="stat-value">FastAPI</span><span class="stat-label">Backend</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg></div>
+                    <div class="stat-info"><span class="stat-value">PostgreSQL</span><span class="stat-label">Database + FTS</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+                    <div class="stat-info"><span class="stat-value">Redis</span><span class="stat-label">Cache + Auth</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+                    <div class="stat-info"><span class="stat-value">Docker</span><span class="stat-label">Container</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator animate-in">
+            <div class="scroll-mouse"><div class="scroll-dot"></div></div>
+            <span>Cuộn xuống</span>
+        </div>
+    </section>
+
+    <!-- ====== ARCHITECTURE ====== -->
+    <section id="architecture" class="section">
+        <div class="section-container">
+            <div class="section-header animate-in">
+                <span class="section-tag">01</span>
+                <h2 class="section-title">Kiến Trúc Tổng Thể</h2>
+                <p class="section-desc">Click vào từng thành phần để xem chi tiết vai trò và chức năng</p>
+            </div>
+
+            <div class="arch-diagram animate-in">
+                <!-- Client Layer -->
+                <div class="arch-layer" id="layer-client">
+                    <div class="layer-label">Tầng Client</div>
+                    <div class="arch-nodes">
+                        <div class="arch-node node-client" id="node-web"
+                             data-popup-title="Web Browser (React + Vite)"
+                             data-popup-body="• SPA viết bằng React + TypeScript&#10;• Build tool: Vite (siêu nhanh)&#10;• Gửi HTTP request tới FastAPI&#10;• Lưu JWT token trong memory&#10;• Responsive trên mọi thiết bị">
+                            <div class="node-icon">🌐</div>
+                            <div class="node-name">Web Browser</div>
+                            <div class="node-tech">React / Vite</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arch-arrow">
+                    <svg viewBox="0 0 40 60" width="40" height="60"><defs><linearGradient id="arrowGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient></defs><line x1="20" y1="5" x2="20" y2="45" stroke="url(#arrowGrad)" stroke-width="2" stroke-dasharray="4,4" class="flow-line"/><polygon points="12,42 20,55 28,42" fill="url(#arrowGrad)" class="flow-arrow"/></svg>
+                    <span class="arrow-label">HTTPS / REST</span>
+                </div>
+
+                <!-- API Layer -->
+                <div class="arch-layer" id="layer-api">
+                    <div class="layer-label">Tầng API (Container)</div>
+                    <div class="arch-nodes">
+                        <div class="arch-node node-api" id="node-fastapi"
+                             data-popup-title="FastAPI — API Gateway"
+                             data-popup-body="• Framework Python async (ASGI)&#10;• Chạy qua Uvicorn&#10;• Auto-gen Swagger docs tại /docs&#10;• CORS, Rate Limit middleware&#10;• Prometheus metrics integration">
+                            <div class="node-icon">⚡</div>
+                            <div class="node-name">FastAPI</div>
+                            <div class="node-tech">API Gateway</div>
+                        </div>
+                        <div class="arch-node node-auth" id="node-auth"
+                             data-popup-title="Auth Module — Bảo mật"
+                             data-popup-body="• JWT Access Token (15 phút)&#10;• Refresh Token (7 ngày)&#10;• Bcrypt hash mật khẩu&#10;• Redis Blacklist khi logout&#10;• Role-based: admin / viewer">
+                            <div class="node-icon">🔐</div>
+                            <div class="node-name">Auth Module</div>
+                            <div class="node-tech">JWT + Bcrypt</div>
+                        </div>
+                        <div class="arch-node node-search" id="node-search"
+                             data-popup-title="Search Module — Tìm kiếm"
+                             data-popup-body="• Normalize tiếng Việt (bỏ dấu)&#10;• Synonym expansion (AI → trí tuệ nhân tạo)&#10;• FTS: TSVECTOR + ts_rank&#10;• Fuzzy: pg_trgm similarity()&#10;• Cache kết quả 5 phút">
+                            <div class="node-icon">🔍</div>
+                            <div class="node-name">Search Module</div>
+                            <div class="node-tech">FTS Engine</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arch-arrow">
+                    <svg viewBox="0 0 40 60" width="40" height="60"><line x1="20" y1="5" x2="20" y2="45" stroke="url(#arrowGrad)" stroke-width="2" stroke-dasharray="4,4" class="flow-line"/><polygon points="12,42 20,55 28,42" fill="url(#arrowGrad)" class="flow-arrow"/></svg>
+                    <span class="arrow-label">SQLAlchemy ORM</span>
+                </div>
+
+                <!-- Data Layer -->
+                <div class="arch-layer" id="layer-data">
+                    <div class="layer-label">Tầng Dữ Liệu</div>
+                    <div class="arch-nodes">
+                        <div class="arch-node node-db" id="node-postgres"
+                             data-popup-title="PostgreSQL — DB + Search"
+                             data-popup-body="• Lưu trữ quan hệ (Relational)&#10;• TSVECTOR: Full-Text Search tích hợp&#10;• pg_trgm: Tìm kiếm mờ (fuzzy)&#10;• GIN Index: Inverted index siêu nhanh&#10;• Generated column: auto-update search_vector">
+                            <div class="node-icon">🗄️</div>
+                            <div class="node-name">PostgreSQL</div>
+                            <div class="node-tech">DB + Search</div>
+                        </div>
+                        <div class="arch-node node-cache" id="node-redis"
+                             data-popup-title="Redis — Cache + State"
+                             data-popup-body="• Cache kết quả search (TTL 5 phút)&#10;• JWT Blacklist khi user logout&#10;• Rate Limit counter (Token Bucket)&#10;• In-memory: tốc độ microsecond&#10;• Fallback sang InMemory nếu Redis down">
+                            <div class="node-icon">⚡</div>
+                            <div class="node-name">Redis</div>
+                            <div class="node-tech">Cache + State</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-grid animate-in">
+                <div class="insight-card">
+                    <div class="insight-icon">🎯</div>
+                    <h3>Stateless API</h3>
+                    <p>FastAPI không lưu session. Mọi state đẩy về Redis → dễ dàng scale horizontal (thêm server)</p>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">🧠</div>
+                    <h3>DB = Search Engine</h3>
+                    <p>PostgreSQL vừa là DB vừa là Search Engine (TSVECTOR + pg_trgm). Không cần Elasticsearch</p>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">🛡️</div>
+                    <h3>Redis đa nhiệm</h3>
+                    <p>Redis làm 3 việc: Cache kết quả search, lưu JWT Blacklist, và đếm Rate Limit</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== DATABASE ====== -->
+    <section id="database" class="section section-alt">
+        <div class="section-container">
+            <div class="section-header animate-in">
+                <span class="section-tag">02</span>
+                <h2 class="section-title">Cơ Sở Dữ Liệu</h2>
+                <p class="section-desc">PostgreSQL với Full-Text Search tích hợp — click vào <code>search_vector</code> để xem chi tiết</p>
+            </div>
+
+            <div class="db-schema animate-in">
+                <div class="schema-table table-main">
+                    <div class="table-header"><span class="table-icon">📋</span><span class="table-name">research_projects</span><span class="table-badge">Bảng chính</span></div>
+                    <div class="table-columns">
+                        <div class="col-row col-pk"><span class="col-key">PK</span><span class="col-name">id</span><span class="col-type">UUID</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">ten_de_tai</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">chu_nhiem</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">doi_tuong</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">linh_vuc</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">nam_thuc_hien</span><span class="col-type">INTEGER</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">trang_thai</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">tom_tat</span><span class="col-type">TEXT</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">tu_khoa</span><span class="col-type">JSON[]</span></div>
+                        <div class="col-row col-special" id="col-search-vector" title="Click để xem chi tiết"><span class="col-key">⚡</span><span class="col-name">search_vector</span><span class="col-type">TSVECTOR</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">pdf_url</span><span class="col-type">VARCHAR</span></div>
+                    </div>
+                </div>
+                <div class="schema-relation"><svg viewBox="0 0 80 20" width="80" height="20"><line x1="0" y1="10" x2="80" y2="10" stroke="#3b82f6" stroke-width="2" stroke-dasharray="6,3"/></svg></div>
+                <div class="schema-table table-secondary">
+                    <div class="table-header"><span class="table-icon">👤</span><span class="table-name">users</span><span class="table-badge secondary">Auth</span></div>
+                    <div class="table-columns">
+                        <div class="col-row col-pk"><span class="col-key">PK</span><span class="col-name">id</span><span class="col-type">UUID</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">email</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">full_name</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">hashed_password</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">role</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-key"></span><span class="col-name">is_active</span><span class="col-type">BOOLEAN</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="index-strategy animate-in">
+                <h3 class="subsection-title"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Chiến lược Index</h3>
+                <div class="index-cards">
+                    <div class="index-card"><div class="index-type">GIN</div><div class="index-target">search_vector</div><div class="index-desc">Inverted Index — ánh xạ mỗi từ → danh sách hàng chứa nó. Tốc độ O(log N)</div><div class="index-speed"><div class="speed-bar" style="--width: 95%"></div><span>Cực nhanh</span></div></div>
+                    <div class="index-card"><div class="index-type">GIN + trgm</div><div class="index-target">ten_de_tai</div><div class="index-desc">Trigram Index — hỗ trợ tìm kiếm mờ, sai chính tả, thiếu dấu</div><div class="index-speed"><div class="speed-bar" style="--width: 80%"></div><span>Rất nhanh</span></div></div>
+                    <div class="index-card"><div class="index-type">B-Tree</div><div class="index-target">nam_thuc_hien, trang_thai</div><div class="index-desc">Lọc nhanh theo năm, trạng thái — dùng khi kết hợp filter</div><div class="index-speed"><div class="speed-bar" style="--width: 70%"></div><span>Nhanh</span></div></div>
+                </div>
+            </div>
+
+            <div class="tsvector-demo animate-in" id="tsvector-detail">
+                <h3 class="subsection-title"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>TSVECTOR hoạt động thế nào?</h3>
+                <div class="tsvector-flow">
+                    <div class="tv-step"><div class="tv-step-num">1</div><div class="tv-step-content"><div class="tv-label">Dữ liệu gốc</div><code>"Nghiên cứu ứng dụng trí tuệ nhân tạo trong giáo dục"</code></div></div>
+                    <div class="tv-arrow">→</div>
+                    <div class="tv-step"><div class="tv-step-num">2</div><div class="tv-step-content"><div class="tv-label">Lexer phân tách + bỏ dấu</div><div class="tv-tokens"><span class="token">'nghien'</span><span class="token">'cuu'</span><span class="token">'ung'</span><span class="token">'dung'</span><span class="token highlight">'tri'</span><span class="token highlight">'tue'</span><span class="token highlight">'nhan'</span><span class="token highlight">'tao'</span><span class="token">'giao'</span><span class="token">'duc'</span></div></div></div>
+                    <div class="tv-arrow">→</div>
+                    <div class="tv-step"><div class="tv-step-num">3</div><div class="tv-step-content"><div class="tv-label">GIN Index lookup</div><div class="tv-result">Tìm thấy trong <strong>O(log N)</strong> thay vì quét toàn bảng O(N)</div></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== SEARCH ====== -->
+    <section id="search" class="section">
+        <div class="section-container">
+            <div class="section-header animate-in">
+                <span class="section-tag">03</span>
+                <h2 class="section-title">Thuật Toán Tìm Kiếm</h2>
+                <p class="section-desc">Thử nhập từ khóa bên dưới để xem luồng xử lý thực tế</p>
+            </div>
+
+            <!-- INTERACTIVE SEARCH DEMO -->
+            <div class="search-demo animate-in" id="search-demo">
+                <div class="search-demo-input-wrap">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    <input type="text" class="search-demo-input" id="demo-input" placeholder="Thử nhập: trí tuệ nhân tạo, CNTT, y học..." autocomplete="off">
+                    <button class="search-demo-btn" id="demo-btn">Tìm kiếm</button>
+                </div>
+                <div class="search-demo-steps" id="demo-steps">
+                    <div class="demo-placeholder">Nhập từ khóa và nhấn "Tìm kiếm" để xem luồng xử lý</div>
+                </div>
+            </div>
+
+            <!-- STATIC FLOW DIAGRAM -->
+            <div class="search-flow animate-in">
+                <div class="flow-step" data-step="1">
+                    <div class="flow-node"><div class="flow-icon">👤</div><div><div class="flow-title">User nhập</div><div class="flow-detail">"Tri tue nhan tao"</div></div></div>
+                    <div class="flow-connector"><div class="connector-line"></div><div class="connector-dot"></div></div>
+                </div>
+                <div class="flow-step" data-step="2">
+                    <div class="flow-node"><div class="flow-icon">🔧</div><div><div class="flow-title">Normalize</div><div class="flow-detail">Lowercase, xóa trắng thừa, bỏ dấu tiếng Việt, thay từ đồng nghĩa</div></div></div>
+                    <div class="flow-connector"><div class="connector-line"></div><div class="connector-dot"></div></div>
+                </div>
+                <div class="flow-step" data-step="3">
+                    <div class="flow-node cache-check"><div class="flow-icon">⚡</div><div><div class="flow-title">Redis Cache</div><div class="flow-detail">Kiểm tra key <code>search_cache:q:tri+tue+nhan+tao</code></div></div></div>
+                    <div class="flow-branch">
+                        <div class="branch hit"><span class="branch-label">✅ Cache Hit</span><span class="branch-time">~2ms</span></div>
+                        <div class="branch miss"><span class="branch-label">❌ Cache Miss</span><span class="branch-arrow">↓</span></div>
+                    </div>
+                </div>
+                <div class="flow-step" data-step="4">
+                    <div class="flow-node"><div class="flow-icon">🗄️</div><div><div class="flow-title">PostgreSQL FTS</div><div class="flow-detail"><code>WHERE search_vector @@ to_tsquery('...')</code><br>+ <code>similarity()</code> cho fuzzy matching</div></div></div>
+                    <div class="flow-connector"><div class="connector-line"></div><div class="connector-dot"></div></div>
+                </div>
+                <div class="flow-step" data-step="5">
+                    <div class="flow-node"><div class="flow-icon">📊</div><div><div class="flow-title">Ranking</div><div class="flow-detail"><div class="rank-weights"><div class="weight-item"><span class="weight-a">A</span> Title (cao nhất)</div><div class="weight-item"><span class="weight-b">B</span> Author</div><div class="weight-item"><span class="weight-c">C</span> Abstract</div></div><div style="margin-top:6px;font-size:0.75rem;color:#64748b">Score = ts_rank × 2.0 + max_similarity</div></div></div></div>
+                    <div class="flow-connector"><div class="connector-line"></div><div class="connector-dot"></div></div>
+                </div>
+                <div class="flow-step" data-step="6">
+                    <div class="flow-node final"><div class="flow-icon">✨</div><div><div class="flow-title">Response</div><div class="flow-detail">JSON + lưu cache Redis (TTL 5 phút) → ~50ms</div></div></div>
+                </div>
+            </div>
+
+            <div class="cache-strategy animate-in">
+                <h3 class="subsection-title"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.66 0 3-4 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4-3-9s1.34-9 3-9"/></svg>Cache Invalidation (Xóa cache cũ)</h3>
+                <div class="invalidation-flow">
+                    <div class="inv-step"><div class="inv-icon">✏️</div><div class="inv-text">Admin sửa/xóa đề tài</div></div>
+                    <div class="inv-arrow">→</div>
+                    <div class="inv-step"><div class="inv-icon">💾</div><div class="inv-text">DB commit thành công</div></div>
+                    <div class="inv-arrow">→</div>
+                    <div class="inv-step"><div class="inv-icon">🧹</div><div class="inv-text">Background Task xóa tất cả key <code>search_cache:*</code></div></div>
+                    <div class="inv-arrow">→</div>
+                    <div class="inv-step"><div class="inv-icon">🔄</div><div class="inv-text">Lần search tiếp → Cache Miss → Lấy data mới</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== API ====== -->
+    <section id="api" class="section section-alt">
+        <div class="section-container">
+            <div class="section-header animate-in">
+                <span class="section-tag">04</span>
+                <h2 class="section-title">API Endpoints</h2>
+                <p class="section-desc">Click vào tiêu đề nhóm để mở/đóng — Auto-docs tại <code>/docs</code></p>
+            </div>
+
+            <div class="api-groups animate-in">
+                <div class="api-group" id="api-search">
+                    <div class="api-group-header"><span class="api-group-icon">🔍</span><h3>Search</h3><span class="api-group-toggle">▼</span></div>
+                    <div class="api-endpoints">
+                        <div class="api-endpoint"><span class="method get">GET</span><span class="path">/api/v1/projects/search</span><span class="api-desc">Tìm kiếm đề tài (FTS + Fuzzy)</span></div>
+                        <div class="api-endpoint"><span class="method get">GET</span><span class="path">/api/v1/filters</span><span class="api-desc">Lấy danh sách filter (năm, lĩnh vực...)</span></div>
+                    </div>
+                </div>
+                <div class="api-group" id="api-crud">
+                    <div class="api-group-header"><span class="api-group-icon">📋</span><h3>Projects (CRUD)</h3><span class="api-group-toggle">▼</span></div>
+                    <div class="api-endpoints">
+                        <div class="api-endpoint"><span class="method get">GET</span><span class="path">/api/v1/projects</span><span class="api-desc">Danh sách đề tài (phân trang)</span></div>
+                        <div class="api-endpoint"><span class="method get">GET</span><span class="path">/api/v1/projects/{id}</span><span class="api-desc">Chi tiết 1 đề tài</span></div>
+                        <div class="api-endpoint"><span class="method post">POST</span><span class="path">/api/v1/projects</span><span class="api-desc">Tạo đề tài mới 🔒 Admin</span></div>
+                        <div class="api-endpoint"><span class="method put">PUT</span><span class="path">/api/v1/projects/{id}</span><span class="api-desc">Cập nhật đề tài 🔒 Admin</span></div>
+                        <div class="api-endpoint"><span class="method delete">DEL</span><span class="path">/api/v1/projects/{id}</span><span class="api-desc">Xóa đề tài 🔒 Admin</span></div>
+                    </div>
+                </div>
+                <div class="api-group" id="api-auth">
+                    <div class="api-group-header"><span class="api-group-icon">🔐</span><h3>Authentication</h3><span class="api-group-toggle">▼</span></div>
+                    <div class="api-endpoints">
+                        <div class="api-endpoint"><span class="method post">POST</span><span class="path">/api/v1/auth/login</span><span class="api-desc">Đăng nhập → Access + Refresh Token</span></div>
+                        <div class="api-endpoint"><span class="method post">POST</span><span class="path">/api/v1/auth/refresh</span><span class="api-desc">Refresh → Access Token mới</span></div>
+                        <div class="api-endpoint"><span class="method post">POST</span><span class="path">/api/v1/auth/logout</span><span class="api-desc">Đăng xuất → Blacklist JWT</span></div>
+                        <div class="api-endpoint"><span class="method get">GET</span><span class="path">/api/v1/auth/me</span><span class="api-desc">Xem profile 🔒</span></div>
+                        <div class="api-endpoint"><span class="method get">GET</span><span class="path">/api/v1/auth/users</span><span class="api-desc">Danh sách users 🔒 Admin</span></div>
+                    </div>
+                </div>
+                <div class="api-group" id="api-system">
+                    <div class="api-group-header"><span class="api-group-icon">⚙️</span><h3>System</h3><span class="api-group-toggle">▼</span></div>
+                    <div class="api-endpoints">
+                        <div class="api-endpoint"><span class="method get">GET</span><span class="path">/health</span><span class="api-desc">Health check (Docker)</span></div>
+                        <div class="api-endpoint"><span class="method get">GET</span><span class="path">/metrics</span><span class="api-desc">Prometheus metrics</span></div>
+                        <div class="api-endpoint"><span class="method get">GET</span><span class="path">/docs</span><span class="api-desc">Swagger UI (auto-generated)</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="folder-structure animate-in">
+                <h3 class="subsection-title"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Cấu trúc thư mục Backend</h3>
+                <div class="folder-tree">
+                    <div class="tree-item folder"><span class="tree-icon">📁</span> backend/app/</div>
+                    <div class="tree-item folder indent-1"><span class="tree-icon">📁</span> api/v1/ <span class="tree-desc">— Route handlers (endpoints)</span></div>
+                    <div class="tree-item file indent-2"><span class="tree-icon">📄</span> search.py <span class="tree-desc">— Logic tìm kiếm + CRUD đề tài</span></div>
+                    <div class="tree-item file indent-2"><span class="tree-icon">📄</span> auth.py <span class="tree-desc">— Login/Logout/Refresh/User management</span></div>
+                    <div class="tree-item file indent-2"><span class="tree-icon">📄</span> filters.py <span class="tree-desc">— Lấy danh sách filter options</span></div>
+                    <div class="tree-item folder indent-1"><span class="tree-icon">📁</span> models/ <span class="tree-desc">— SQLAlchemy ORM models</span></div>
+                    <div class="tree-item file indent-2"><span class="tree-icon">📄</span> project.py <span class="tree-desc">— Bảng research_projects</span></div>
+                    <div class="tree-item file indent-2"><span class="tree-icon">📄</span> user.py <span class="tree-desc">— Bảng users</span></div>
+                    <div class="tree-item folder indent-1"><span class="tree-icon">📁</span> schemas/ <span class="tree-desc">— Pydantic validation schemas</span></div>
+                    <div class="tree-item folder indent-1"><span class="tree-icon">📁</span> core/ <span class="tree-desc">— Config, security, rate_limit</span></div>
+                    <div class="tree-item folder indent-1"><span class="tree-icon">📁</span> db/ <span class="tree-desc">— Database session & engine</span></div>
+                    <div class="tree-item folder indent-1"><span class="tree-icon">📁</span> utils/ <span class="tree-desc">— Text normalize, audience helpers</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== AUTH ====== -->
+    <section id="auth" class="section">
+        <div class="section-container">
+            <div class="section-header animate-in">
+                <span class="section-tag">05</span>
+                <h2 class="section-title">Xác Thực & Bảo Mật</h2>
+                <p class="section-desc">Click vào từng bước để xem chi tiết</p>
+            </div>
+
+            <div class="auth-flow animate-in">
+                <div class="auth-timeline">
+                    <div class="timeline-step expanded">
+                        <div class="tl-dot"></div>
+                        <div class="tl-content">
+                            <div class="tl-title">1. Login</div>
+                            <div class="tl-expand-hint">Click để mở rộng ↓</div>
+                            <div class="tl-body tl-body-detail">
+                                <div class="token-pair">
+                                    <div class="token access"><span class="token-label">Access Token</span><span class="token-ttl">TTL: 60 phút</span><span class="token-use">Gửi trong Header mỗi API call</span></div>
+                                    <div class="token refresh"><span class="token-label">Refresh Token</span><span class="token-ttl">TTL: 7 ngày</span><span class="token-use">Chỉ dùng để lấy Access mới</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="tl-dot"></div>
+                        <div class="tl-content">
+                            <div class="tl-title">2. Gọi API (mỗi request)</div>
+                            <div class="tl-expand-hint">Click để mở rộng ↓</div>
+                            <div class="tl-body tl-body-detail">
+                                <code class="header-example">Authorization: Bearer &lt;access_token&gt;</code>
+                                <div class="tl-note">Middleware kiểm tra: Token hợp lệ? Chưa hết hạn? JTI có trong Blacklist?</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="tl-dot"></div>
+                        <div class="tl-content">
+                            <div class="tl-title">3. Token hết hạn → Auto refresh</div>
+                            <div class="tl-expand-hint">Click để mở rộng ↓</div>
+                            <div class="tl-body tl-body-detail">
+                                <div class="tl-note">Frontend dùng Refresh Token gọi <code>/auth/refresh</code> → nhận Access Token mới → user không bị logout</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="tl-dot"></div>
+                        <div class="tl-content">
+                            <div class="tl-title">4. Logout → Redis Blacklist</div>
+                            <div class="tl-expand-hint">Click để mở rộng ↓</div>
+                            <div class="tl-body tl-body-detail">
+                                <div class="tl-note">Lấy <strong>JTI</strong> (JWT ID) → thêm vào Redis Blacklist với TTL = thời gian còn lại</div>
+                                <code class="redis-cmd">SETEX blacklist:&lt;jti&gt; &lt;remaining_seconds&gt; 1</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rate-limit animate-in">
+                <h3 class="subsection-title"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Rate Limiting (Chống DDoS)</h3>
+                <div class="rate-cards">
+                    <div class="rate-card"><div class="rate-icon">🔑</div><div class="rate-title">Authenticated User</div><div class="rate-key">Key = <code>user_id</code> từ JWT</div><div class="rate-limit-value">100 req/phút</div></div>
+                    <div class="rate-card"><div class="rate-icon">👤</div><div class="rate-title">Guest (không login)</div><div class="rate-key">Key = <code>Hash(IP + User-Agent)</code></div><div class="rate-limit-value">30 req/phút</div><div class="rate-note">Phân biệt thiết bị cùng WiFi</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== DEVOPS ====== -->
+    <section id="devops" class="section section-alt">
+        <div class="section-container">
+            <div class="section-header animate-in">
+                <span class="section-tag">06</span>
+                <h2 class="section-title">DevOps & Giám Sát</h2>
+                <p class="section-desc">Docker container hóa + Prometheus metrics + Auto-healing</p>
+            </div>
+            <div class="devops-grid animate-in">
+                <div class="devops-card"><div class="devops-header"><span class="devops-icon">🐳</span><h3>Docker Compose</h3></div><div class="devops-body"><div class="container-stack"><div class="container-item"><span class="container-name">backend</span><span class="container-port">:8000</span></div><div class="container-item"><span class="container-name">frontend</span><span class="container-port">:5173</span></div><div class="container-item"><span class="container-name">postgres</span><span class="container-port">:5432</span></div><div class="container-item"><span class="container-name">redis</span><span class="container-port">:6379</span></div><div class="container-item"><span class="container-name">prometheus</span><span class="container-port">:9090</span></div><div class="container-item"><span class="container-name">grafana</span><span class="container-port">:3000</span></div></div></div></div>
+                <div class="devops-card"><div class="devops-header"><span class="devops-icon">💓</span><h3>Auto-healing</h3></div><div class="devops-body"><div class="health-flow"><div class="health-step"><div class="health-icon pulse">♥</div><span>Docker gọi <code>/health</code> mỗi 30s</span></div><div class="health-step"><div class="health-icon">⚠️</div><span>3 lần fail liên tiếp → <strong>Unhealthy</strong></span></div><div class="health-step"><div class="health-icon">🔄</div><span>Docker tự <strong>KILL + RESTART</strong> container</span></div></div></div></div>
+                <div class="devops-card"><div class="devops-header"><span class="devops-icon">📊</span><h3>Monitoring Metrics</h3></div><div class="devops-body"><div class="metrics-list"><div class="metric-item"><span class="metric-name">http_requests_total</span><span class="metric-type">Counter</span></div><div class="metric-item"><span class="metric-name">http_request_duration_seconds</span><span class="metric-type">Histogram</span></div><div class="metric-item"><span class="metric-name">search_requests_total</span><span class="metric-type">Counter</span></div></div></div></div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand"><span class="gradient-text">VNU Research Repository</span></div>
+            <p>Tài liệu kỹ thuật nội bộ — Dành cho đội phát triển tiếp theo</p>
+            <div class="footer-tech">FastAPI • PostgreSQL • Redis • Docker • React</div>
+        </div>
+    </footer>
+
+    <script src="doc-assets/script.js"></script>
+</body>
+</html>

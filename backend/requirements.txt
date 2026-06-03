@@ -1,0 +1,23 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+# chromadb (Tạm vô hiệu hóa cho Docker)
+# sentence-transformers (Tạm vô hiệu hóa cho Docker)
+
+pydantic-settings
+python-dotenv
+alembic
+bcrypt<5
+email-validator
+python-jose[cryptography]
+
+# Thư viện cho Production-Ready API
+slowapi
+fastapi-cache2
+loguru
+pytest
+httpx
+redis
+prometheus-fastapi-instrumentator
+locust
