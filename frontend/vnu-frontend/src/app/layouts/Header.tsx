@@ -22,8 +22,9 @@ export const Header = () => {
                         </div>
                     </Link>
                     <nav className="hidden lg:flex gap-7 font-bold text-[#0a3875] text-[0.9rem] tracking-wide">
-                        <a href="#" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-transparent hover:border-blue-600">TRANG CHỦ</a>
+                        <Link to="/" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-transparent hover:border-blue-600">TRANG CHỦ</Link>
                         <a href="#" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-[#0a3875] text-[#0a3875]">NGHIÊN CỨU</a>
+                        <a href="/doc.html" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-transparent hover:border-blue-600 text-red-600">KIẾN TRÚC WEB</a>
                         <a href="#" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-transparent hover:border-blue-600">ĐÀO TẠO</a>
                         <a href="#" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-transparent hover:border-blue-600">TUYỂN DỤNG</a>
                         <a href="#" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-transparent hover:border-blue-600">GIỚI THIỆU</a>
