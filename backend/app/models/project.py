@@ -20,12 +20,17 @@ class ResearchProject(Base):
     implementation_year = Column(Integer, nullable=True)
     pdf_url = Column(String, nullable=True)
 
-    search_vector = deferred(
-        Column(
-            TSVECTOR,
-            Computed("setweight(to_tsvector('simple', public.immutable_unaccent(coalesce(title, ''))), 'A') || setweight(to_tsvector('simple', public.immutable_unaccent(coalesce(author, ''))), 'C')", persisted=True),
+    from app.core.config import settings
+    
+    if settings.DATABASE_URL.startswith("sqlite"):
+        search_vector = Column(String, nullable=True)
+    else:
+        search_vector = deferred(
+            Column(
+                TSVECTOR,
+                Computed("setweight(to_tsvector('simple', public.immutable_unaccent(coalesce(title, ''))), 'A') || setweight(to_tsvector('simple', public.immutable_unaccent(coalesce(author, ''))), 'C')", persisted=True),
+            )
         )
-    )
 
     __table_args__ = (
         Index("ix_research_projects_search_vector", "search_vector", postgresql_using="gin"),

@@ -30,9 +30,7 @@ def db_engine():
     from app.models.project import ResearchProject
     from app.models.user import User
     
-    # Remove ResearchProject table to avoid SQLite errors with PostgreSQL specific functions (to_tsvector)
-    if ResearchProject.__table__ in Base.metadata.sorted_tables:
-        Base.metadata.remove(ResearchProject.__table__)
+    # Create all tables including ResearchProject (which is now SQLite compatible)
         
     Base.metadata.create_all(bind=engine)
     yield engine

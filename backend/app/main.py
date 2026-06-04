@@ -42,6 +42,49 @@ class LocalRedisFallback:
         self._store[key] = (value, asyncio.get_running_loop().time() + ttl)
 
 
+def setup_admin_user(db):
+    """Helper to pre-provision the default system admin account."""
+    from app.models.user import User
+    from app.core.security import get_password_hash, verify_password
+    from uuid import uuid4
+
+    admin_email = settings.ADMIN_EMAIL.lower()
+    admin_user = db.query(User).filter(User.email == admin_email).first()
+    if not admin_user:
+        logger.info(f"Admin user {admin_email} not found. Creating...")
+        admin_user = User(
+            id=str(uuid4()),
+            email=admin_email,
+            full_name="System Administrator",
+            hashed_password=get_password_hash(settings.ADMIN_PASSWORD),
+            role="admin",
+            is_active=True,
+        )
+        db.add(admin_user)
+        db.commit()
+        db.refresh(admin_user)
+        logger.info("Admin user created successfully.")
+    else:
+        updated = False
+        if not verify_password(settings.ADMIN_PASSWORD, admin_user.hashed_password):
+            logger.info("Admin password has changed. Updating password hash...")
+            admin_user.hashed_password = get_password_hash(settings.ADMIN_PASSWORD)
+            updated = True
+        if admin_user.role != "admin":
+            logger.info("Updating admin user role to admin...")
+            admin_user.role = "admin"
+            updated = True
+        if not admin_user.is_active:
+            logger.info("Activating admin user...")
+            admin_user.is_active = True
+            updated = True
+            
+        if updated:
+            db.commit()
+            db.refresh(admin_user)
+            logger.info("Admin user configuration synchronized successfully.")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     redis = None
@@ -59,6 +102,18 @@ async def lifespan(app: FastAPI):
         logger.warning(f"Redis unavailable, using in-memory cache: {exc}")
         app.state.redis = LocalRedisFallback()
         FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")
+
+    try:
+        from app.db.session import SessionLocal
+        logger.info("Pre-provisioning admin user...")
+        db = SessionLocal()
+        try:
+            setup_admin_user(db)
+        finally:
+            db.close()
+    except Exception as exc:
+        logger.warning(f"Database unavailable for admin pre-provisioning: {exc}")
+
     yield
     logger.info("Shutting down...")
     if redis is not None:
