@@ -254,16 +254,8 @@ export function AdminPage() {
         <div className="max-w-xl bg-white p-6 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-5">
             <h3 className="text-lg font-bold text-[#0a3875]">
-              {authMode === 'login' ? 'Dang nhap admin' : 'Tao tai khoan'}
+              Dang nhap admin
             </h3>
-            <button
-              type="button"
-              className="p-2 border border-gray-200 text-gray-600 hover:text-[#0a3875]"
-              onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
-              title={authMode === 'login' ? 'Tao tai khoan' : 'Dang nhap'}
-            >
-              {authMode === 'login' ? <UserPlus className="w-4 h-4" /> : <LogIn className="w-4 h-4" />}
-            </button>
           </div>
 
           <form className="space-y-4" onSubmit={handleAuthSubmit}>
