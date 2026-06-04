@@ -13,8 +13,8 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://127.0.0.1:5173",
     ]
-    ADMIN_EMAIL: str = "thongtin_nghiencuc_khoahoc@hus.edu.vn"
-    ADMIN_PASSWORD: str = "@dmin123"
+    ADMIN_EMAIL: str = "admin@example.com"
+    ADMIN_PASSWORD: str = "admin_default_pass"
 
 
     @field_validator("SECRET_KEY")

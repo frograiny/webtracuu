@@ -1,8 +1,12 @@
 {
+  "cleanUrls": true,
   "rewrites": [
-    {
-      "source": "/((?!assets/|doc-assets/|doc.html|slides.html|logo.png|vite.svg).*)$",
-      "destination": "/index.html"
-    }
+    { "source": "/doc.html", "destination": "/doc.html" },
+    { "source": "/slides.html", "destination": "/slides.html" },
+    { "source": "/assets/:path*", "destination": "/assets/:path*" },
+    { "source": "/doc-assets/:path*", "destination": "/doc-assets/:path*" },
+    { "source": "/logo.png", "destination": "/logo.png" },
+    { "source": "/vite.svg", "destination": "/vite.svg" },
+    { "source": "/:path*", "destination": "/index.html" }
   ]
 }
