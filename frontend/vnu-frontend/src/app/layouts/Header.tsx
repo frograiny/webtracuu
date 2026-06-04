@@ -25,7 +25,6 @@ export const Header = () => {
                         <Link to="/" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-transparent hover:border-blue-600">TRANG CHỦ</Link>
                         <a href="#" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-[#0a3875] text-[#0a3875]">NGHIÊN CỨU</a>
                         <a href="/doc.html" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-transparent hover:border-blue-600 text-red-600">KIẾN TRÚC WEB</a>
-                        <a href="/slides.html" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-transparent hover:border-blue-600 text-green-600 flex items-center gap-1.5">SLIDES BÁO CÁO <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span></a>
                         <a href="#" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-transparent hover:border-blue-600">ĐÀO TẠO</a>
                         <a href="#" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-transparent hover:border-blue-600">TUYỂN DỤNG</a>
                         <a href="#" className="hover:text-blue-600 transition-colors py-3 border-b-2 border-transparent hover:border-blue-600">GIỚI THIỆU</a>

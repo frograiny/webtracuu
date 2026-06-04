@@ -1,12 +1,7 @@
 {
   "cleanUrls": true,
-  "rewrites": [
-    { "source": "/doc.html", "destination": "/doc.html" },
-    { "source": "/slides.html", "destination": "/slides.html" },
-    { "source": "/assets/:path*", "destination": "/assets/:path*" },
-    { "source": "/doc-assets/:path*", "destination": "/doc-assets/:path*" },
-    { "source": "/logo.png", "destination": "/logo.png" },
-    { "source": "/vite.svg", "destination": "/vite.svg" },
-    { "source": "/:path*", "destination": "/index.html" }
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
