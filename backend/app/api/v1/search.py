@@ -173,13 +173,11 @@ def _build_search_query(db: Session, q_normalized: str):
     - Dùng pg_trgm similarity cho Fuzzy matching (sai chính tả, đảo từ).
     """
     expanded_query = apply_synonyms(q_normalized)
-    keywords = expanded_query.split()
-    if not keywords:
+    if not expanded_query.strip():
         return None
 
-    # Thay khoảng trắng bằng & để tạo TSQUERY (AND logic cho FTS)
-    tsquery_string = " & ".join(keywords)
-    search_query = func.to_tsquery('simple', func.unaccent(tsquery_string))
+    # Dùng websearch_to_tsquery giúp tự động xử lý ký tự đặc biệt từ người dùng (tránh lỗi cú pháp)
+    search_query = func.websearch_to_tsquery('simple', func.public.immutable_unaccent(expanded_query))
 
     # Điều kiện FTS
     fts_condition = ResearchProject.search_vector.op('@@')(search_query)
@@ -187,17 +185,16 @@ def _build_search_query(db: Session, q_normalized: str):
     # Điểm FTS (ts_rank)
     ts_rank_score = func.ts_rank(ResearchProject.search_vector, search_query)
 
-    # Điểm Similarity (pg_trgm) trên Title và Author
-    # Giúp tìm những từ sai chính tả hoặc gõ sát nghĩa
-    title_sim = func.similarity(func.unaccent(ResearchProject.title), func.unaccent(q_normalized))
-    author_sim = func.similarity(func.unaccent(ResearchProject.author), func.unaccent(q_normalized))
+    # Điểm Similarity (pg_trgm) trên Title và Author (dùng public.immutable_unaccent để đảm bảo an toàn schema)
+    title_sim = func.similarity(func.public.immutable_unaccent(ResearchProject.title), func.public.immutable_unaccent(q_normalized))
+    author_sim = func.similarity(func.public.immutable_unaccent(ResearchProject.author), func.public.immutable_unaccent(q_normalized))
     max_sim = func.greatest(title_sim, author_sim)
 
     # Tổng điểm: ưu tiên FTS rank (trọng số cao) + Similarity
     total_score = ts_rank_score * 2.0 + max_sim
 
-    # Filter: thỏa mãn FTS hoặc similarity > 0.2 (để pass lỗi chính tả nhỏ)
-    combined_filter = or_(fts_condition, max_sim > 0.2)
+    # Filter: Tách điều kiện OR để PostgreSQL có thể sử dụng cơ chế Bitmap Index Scan (tránh Sequential Scan của greatest)
+    combined_filter = or_(fts_condition, title_sim > 0.2, author_sim > 0.2)
 
     query = (
         db.query(ResearchProject, total_score.label("relevance_score"))
