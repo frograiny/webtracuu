@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VNU Research Repository - Slides Báo Cáo</title>
+  <link rel="icon" type="image/png" href="/logo.png">
+  <link rel="stylesheet" href="/doc-assets/slides.css">
+</head>
+<body>
+
+  <!-- Background decorations -->
+  <div class="keyboard-hint">
+    <span>Điều khiển:</span>
+    <span class="k-key">←</span>
+    <span class="k-key">→</span>
+    <span class="k-key">Space</span>
+    <span class="k-key">F</span> (Toàn màn hình)
+  </div>
+
+  <div class="presentation-container">
+    <div class="slides-wrapper">
+
+      <!-- SLIDE 1: Title Slide -->
+      <section class="slide active" id="slide-1">
+        <div class="slide-header">
+          <span class="slide-number">SLIDE 01 / 08</span>
+          <span class="slide-subtitle">VNU Research Repository</span>
+        </div>
+        <div class="slide-body">
+          <div class="cover-layout">
+            <div class="cover-logo-wrapper">
+              <img src="/logo.png" alt="HUS Logo" style="width: 100%; height: 100%; object-contain: contain;">
+            </div>
+            <h1 class="cover-title">VNU Research Repository</h1>
+            <p class="cover-subtitle">Hệ thống tủ sách số thông minh và tra cứu đề tài nghiên cứu khoa học trường ĐH Khoa học Tự nhiên - ĐHQGHN</p>
+            
+            <div class="cover-tech-stack">
+              <div class="tech-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                FastAPI Async
+              </div>
+              <div class="tech-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 7h.01"/></svg>
+                PostgreSQL (FTS)
+              </div>
+              <div class="tech-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Redis Cache
+              </div>
+              <div class="tech-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="2" width="20" height="8" rx="2.5"/><rect x="2" y="14" width="20" height="8" rx="2.5"/></svg>
+                Docker Compose
+              </div>
+              <div class="tech-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
+                React & Vite
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="slide-footer-left">Đại học Khoa học Tự nhiên - ĐHQGHN</div>
+          <div class="slide-footer-right">HUS TRƯỜNG</div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: Problem & Solution -->
+      <section class="slide future" id="slide-2">
+        <div class="slide-header">
+          <span class="slide-number">SLIDE 02 / 08</span>
+          <h2 class="slide-title">Bài Toán & Giải Pháp</h2>
+        </div>
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card card-purple">
+              <div class="card-title" style="color: #f472b6;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Thách Thức & Bài Toán
+              </div>
+              <ul class="highlight-list">
+                <li><strong>Chặn cổng mạng:</strong> Tường lửa máy chủ khoa chỉ mở cổng 80, chặn cổng API 8000 của Backend.</li>
+                <li><strong>Tra cứu thủ công:</strong> Cơ sở dữ liệu phân mảnh, không tập trung, tìm kiếm mất nhiều thời gian.</li>
+                <li><strong>Sai lệch từ khóa:</strong> Tìm kiếm tiếng Việt có dấu/không dấu hoặc gõ sai chính tả không trả về kết quả.</li>
+              </ul>
+            </div>
+            
+            <div class="card card-cyan">
+              <div class="card-title" style="color: var(--accent-cyan);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Giải Pháp Kỹ Thuật
+              </div>
+              <ul class="highlight-list">
+                <li><strong>Cấu hình Nginx:</strong> Định tuyến đảo (Reverse Proxy) chạy Frontend và Backend chung cổng 80 công khai.</li>
+                <li><strong>Kho số thông minh:</strong> Tích hợp giao diện Single Page Application phản hồi nhanh < 50ms.</li>
+                <li><strong>Tìm kiếm lai (Hybrid Search):</strong> Kết hợp PostgreSQL Full-Text Search và Trigram Fuzzy Match.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="slide-footer-left">Đồ án tốt nghiệp - VNU Research Repository</div>
+          <div class="slide-footer-right">Bài toán & Giải pháp</div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: Architecture SOA -->
+      <section class="slide future" id="slide-3">
+        <div class="slide-header">
+          <span class="slide-number">SLIDE 03 / 08</span>
+          <h2 class="slide-title">Kiến Trúc Hệ Thống (3 Lớp SOA)</h2>
+        </div>
+        <div class="slide-body">
+          <div class="architecture-canvas">
+            <div class="arch-column">
+              <div class="arch-header">1. Giao Diện (Client)</div>
+              <div class="arch-node" style="border-color: var(--accent-purple);">
+                <h4 style="color:#fff; margin-bottom: 2px;">React Web Application</h4>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Vite / TypeScript / Tailwind</span>
+              </div>
+              <div class="arch-node" style="border-color: var(--accent-purple);">
+                <h4 style="color:#fff; margin-bottom: 2px;">PDF Viewer (Embed)</h4>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Tài liệu thuyết minh</span>
+              </div>
+            </div>
+            
+            <div class="arch-column" style="background: rgba(79, 172, 254, 0.05); border-color: rgba(79, 172, 254, 0.15);">
+              <div class="arch-header" style="color: var(--accent-blue);">2. Trung gian & API Gateway</div>
+              <div class="arch-node" style="border-color: var(--accent-blue);">
+                <h4 style="color:var(--accent-blue); margin-bottom: 2px;">Nginx Gateway (Cổng 80)</h4>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Định tuyến / Phân tải</span>
+              </div>
+              <div class="arch-connector">↓ ↑</div>
+              <div class="arch-node" style="border-color: var(--accent-blue);">
+                <h4 style="color:var(--accent-cyan); margin-bottom: 2px;">FastAPI Async Server</h4>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Python Uvicorn / REST APIs</span>
+              </div>
+            </div>
+            
+            <div class="arch-column">
+              <div class="arch-header">3. Cơ Sở Dữ Liệu & Cache</div>
+              <div class="arch-node" style="border-color: var(--accent-green);">
+                <h4 style="color:#fff; margin-bottom: 2px;">PostgreSQL Database</h4>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Lưu trữ Đề tài / Tác giả</span>
+              </div>
+              <div class="arch-node" style="border-color: var(--accent-green);">
+                <h4 style="color:#fff; margin-bottom: 2px;">Redis Memory Cache</h4>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Cache truy vấn / Blacklist Token</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="slide-footer-left">Sơ đồ luồng dữ liệu kiến trúc phân lớp</div>
+          <div class="slide-footer-right">Kiến trúc</div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: Search Engine Algorithm -->
+      <section class="slide future" id="slide-4">
+        <div class="slide-header">
+          <span class="slide-number">SLIDE 04 / 08</span>
+          <h2 class="slide-title">Thuật Toán Tìm Kiếm Cốt Lõi</h2>
+        </div>
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="step-container">
+              <div class="step-row">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                  <div>
+                    <div class="step-title">Unaccent & Normalization</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted);">Loại bỏ dấu tiếng Việt để tìm kiếm không dấu</div>
+                  </div>
+                  <div class="step-code">unaccent()</div>
+                </div>
+              </div>
+              
+              <div class="step-row">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                  <div>
+                    <div class="step-title">pg_trgm (Trigram Fuzzy Match)</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted);">Chia chuỗi thành cụm 3 ký tự để sửa sai chính tả</div>
+                  </div>
+                  <div class="step-code">similarity()</div>
+                </div>
+              </div>
+              
+              <div class="step-row">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                  <div>
+                    <div class="step-title">Full-Text Search (FTS)</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted);">Phân tách từ tố tìm chính xác dựa trên tsvector</div>
+                  </div>
+                  <div class="step-code">tsvector @@ tsquery</div>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="card card-blue" style="margin-bottom: 1rem;">
+                <div class="card-title" style="color:var(--accent-blue);">Công Thức Tính Điểm Tin Cậy (Score)</div>
+                <div class="card-desc" style="font-family: var(--font-mono); font-size: 1.1rem; color: #fff; background: rgba(0,0,0,0.2); padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); text-align: center; margin-top: 0.5rem;">
+                  Score = (ts_rank * 2.0) + similarity
+                </div>
+              </div>
+              <pre class="code-block" style="margin: 0; font-size: 0.75rem; line-height: 1.4;">
+<span class="code-keyword">SELECT</span> title, 
+  <span class="code-func">ts_rank</span>(search_vector, <span class="code-func">to_tsquery</span>(<span class="code-str">'vietnamese'</span>, :q)) * 2.0 + 
+  <span class="code-func">similarity</span>(unaccent(title), unaccent(:raw_q)) <span class="code-keyword">AS</span> score
+<span class="code-keyword">FROM</span> projects
+<span class="code-keyword">WHERE</span> search_vector @@ <span class="code-func">to_tsquery</span>(...) 
+   <span class="code-keyword">OR</span> unaccent(title) % unaccent(:raw_q)
+<span class="code-keyword">ORDER BY</span> score <span class="code-keyword">DESC</span>;</pre>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="slide-footer-left">Giải thuật tìm kiếm tối ưu hóa tiếng Việt</div>
+          <div class="slide-footer-right">Tìm kiếm</div>
+        </div>
+      </section>
+
+      <!-- SLIDE 5: Database & Cache invalidation -->
+      <section class="slide future" id="slide-5">
+        <div class="slide-header">
+          <span class="slide-number">SLIDE 05 / 08</span>
+          <h2 class="slide-title">Cơ Sở Dữ Liệu & Cơ Chế Cache</h2>
+        </div>
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card card-cyan">
+              <div class="card-title" style="color: var(--accent-cyan);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+                PostgreSQL Index & Schema
+              </div>
+              <ul class="highlight-list" style="font-size: 0.9rem;">
+                <li><strong>GIN Index:</strong> Thiết lập chỉ mục GIN trên cột tổng hợp `search_vector` giúp tìm kiếm đạt tốc độ dưới 5 mili-giây.</li>
+                <li><strong>Mối quan hệ chặt chẽ:</strong> Quản lý liên kết 1-nhiều và nhiều-nhiều giữa Đề tài, Tác giả, Đơn vị đào tạo qua SQLAlchemy.</li>
+              </ul>
+            </div>
+            
+            <div class="card card-green">
+              <div class="card-title" style="color: var(--accent-green);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                Redis Cache Invalidation Flow
+              </div>
+              <ul class="highlight-list" style="font-size: 0.9rem;">
+                <li><strong>Bộ nhớ đệm:</strong> Redis lưu trữ toàn bộ danh sách kết quả tìm kiếm phổ biến và thông tin chi tiết đề tài.</li>
+                <li><strong>Đồng bộ tức thì:</strong> Khi Admin thêm mới hoặc chỉnh sửa dữ liệu, một Background Task trong FastAPI lập tức quét và xóa (`DEL`) cache cũ của Redis để đảm bảo cập nhật dữ liệu trực tuyến.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="slide-footer-left">Tối ưu hiệu năng đọc/ghi thông qua cơ chế đệm dữ liệu</div>
+          <div class="slide-footer-right">Database & Cache</div>
+        </div>
+      </section>
+
+      <!-- SLIDE 6: Authentication & Security -->
+      <section class="slide future" id="slide-6">
+        <div class="slide-header">
+          <span class="slide-number">SLIDE 06 / 08</span>
+          <h2 class="slide-title">Xác Thực & Bảo Mật Hệ Thống</h2>
+        </div>
+        <div class="slide-body">
+          <div class="grid-3">
+            <div class="card card-purple">
+              <div class="card-title" style="color: var(--accent-purple);">JWT Dual Token</div>
+              <p class="card-desc" style="font-size: 0.85rem; line-height: 1.5;">
+                Sử dụng <strong>Access Token</strong> (60 phút) truyền qua Bearer Header và <strong>Refresh Token</strong> (7 ngày) lưu an toàn trong Cookie HttpOnly để chặn đứng tấn công XSS/CSRF.
+              </p>
+            </div>
+            
+            <div class="card card-blue">
+              <div class="card-title" style="color: var(--accent-blue);">Token Blacklisting</div>
+              <p class="card-desc" style="font-size: 0.85rem; line-height: 1.5;">
+                Khi người dùng đăng xuất, ID của Access Token cũ được đẩy vào Redis Blacklist với thời gian sống (TTL) bằng thời hạn còn lại của Token để ngăn chặn tái sử dụng trái phép.
+              </p>
+            </div>
+            
+            <div class="card card-cyan">
+              <div class="card-title" style="color: var(--accent-cyan);">Rate Limiting</div>
+              <p class="card-desc" style="font-size: 0.85rem; line-height: 1.5;">
+                Tích hợp thuật toán Sliding Window Log trên Redis, giới hạn tối đa 100 yêu cầu/phút đối với mỗi địa chỉ IP để chống phá hoại, spam API hoặc tấn công từ chối dịch vụ (DDoS).
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="slide-footer-left">Mô hình an ninh ba lớp: Xác thực, Đăng xuất an toàn và Giới hạn truy cập</div>
+          <div class="slide-footer-right">Bảo mật</div>
+        </div>
+      </section>
+
+      <!-- SLIDE 7: DevOps, Deployment & Monitoring -->
+      <section class="slide future" id="slide-7">
+        <div class="slide-header">
+          <span class="slide-number">SLIDE 07 / 08</span>
+          <h2 class="slide-title">DevOps, Vận Hành & Giám Sát</h2>
+        </div>
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card card-blue">
+              <div class="card-title" style="color: var(--accent-blue);">Đóng Gói Docker Compose</div>
+              <p class="card-desc" style="font-size: 0.9rem; margin-bottom: 0.75rem;">
+                Hệ thống được ảo hóa hoàn chỉnh thành 6 vùng chứa (container) độc lập, tự động hóa toàn bộ quy trình khởi tạo qua 1 lệnh duy nhất:
+              </p>
+              <pre class="code-block" style="padding: 0.75rem; font-size: 0.8rem; background: #000;">
+docker-compose up -d --build</pre>
+              <div style="font-size: 0.8rem; color: var(--accent-green); margin-top: 0.5rem; display: flex; align-items: center; gap: 0.35rem;">
+                <span style="display:inline-block; width:8px; height:8px; background:var(--accent-green); border-radius:50%;"></span>
+                Tự động vá lỗi (Auto-healing: restart always)
+              </div>
+            </div>
+            
+            <div class="card card-cyan">
+              <div class="card-title" style="color: var(--accent-cyan);">Giám Sát Hệ Thống</div>
+              <ul class="highlight-list" style="font-size: 0.9rem;">
+                <li><strong>Prometheus:</strong> Thu thập thời gian thực các chỉ số phần cứng (CPU, RAM), số lượng kết nối DB và thời gian phản hồi của API.</li>
+                <li><strong>Grafana Dashboard:</strong> Trực quan hóa dữ liệu hiệu năng, tự động cảnh báo khi có sự cố nghẽn mạng hoặc lỗi máy chủ.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="slide-footer-left">Kiến trúc phân phối Docker và công cụ đo đạc metrics</div>
+          <div class="slide-footer-right">DevOps</div>
+        </div>
+      </section>
+
+      <!-- SLIDE 8: Conclusion & Future work -->
+      <section class="slide future" id="slide-8">
+        <div class="slide-header">
+          <span class="slide-number">SLIDE 08 / 08</span>
+          <h2 class="slide-title">Tổng Kết & Hướng Phát Triển</h2>
+        </div>
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card card-green">
+              <div class="card-title" style="color: var(--accent-green);">Kết Quả Đạt Được</div>
+              <ul class="highlight-list" style="font-size: 0.95rem;">
+                <li><strong>Độ ổn định cao:</strong> Chạy mượt mà đồng thời trên máy chủ Khoa HUS và các nền tảng đám mây (Vercel & Render).</li>
+                <li><strong>Trải nghiệm tốt:</strong> Tốc độ tải trang tức thì, giao diện tài liệu thuyết minh khoa học đẹp mắt, dễ tương tác.</li>
+                <li><strong>Tìm kiếm tối ưu:</strong> Giải quyết bài toán tìm kiếm từ khóa tiếng Việt phức tạp.</li>
+              </ul>
+            </div>
+            
+            <div class="card card-purple">
+              <div class="card-title" style="color: var(--accent-purple);">Định Hướng Tương Lai</div>
+              <ul class="highlight-list" style="font-size: 0.95rem;">
+                <li><strong>Mở rộng DB:</strong> Áp dụng Postgres Replication (chia tách luồng đọc/ghi dữ liệu để chịu tải cao hơn).</li>
+                <li><strong>Tích hợp AI:</strong> Ứng dụng Vector Database và học máy để gợi ý đề tài thông minh dựa trên hành vi đọc của sinh viên.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="slide-footer-left">Kết thúc bài báo cáo thuyết trình dự án</div>
+          <div class="slide-footer-right">Tổng kết</div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- FLOATING CONTROLLER INTERFACE -->
+  <div class="floating-controls">
+    <button class="btn-ctrl" id="prev-btn" title="Slide trước (←)">&#9664;</button>
+    
+    <select class="slides-dropdown" id="slides-dropdown">
+      <!-- Options populated via JS -->
+    </select>
+    
+    <button class="btn-ctrl" id="play-btn" title="Tự động chạy (8s)">&#9658;</button>
+    <button class="btn-ctrl" id="fullscreen-btn" title="Xem toàn màn hình (F)">&#10064;</button>
+    
+    <button class="btn-ctrl" id="next-btn" title="Slide sau (→/Space)">&#9654;</button>
+  </div>
+
+  <!-- PROGRESS INDICATOR -->
+  <div class="progress-bar-container">
+    <div class="auto-play-timer" id="timer-bar"></div>
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+
+  <script src="/doc-assets/slides.js"></script>
+</body>
+</html>
