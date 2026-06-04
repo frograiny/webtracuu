@@ -11,6 +11,7 @@ from app.core.security import create_access_token, create_refresh_token, decode_
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import LoginRequest, TokenResponse, UserCreate, UserRead, RefreshRequest
+from app.core.config import settings
 from app.core.rate_limit import limiter
 
 router = APIRouter()
@@ -65,18 +66,20 @@ def get_current_viewer(current_user: User = Depends(get_current_user)) -> User:
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def register_user(payload: UserCreate, db: Session = Depends(get_db)):
     email = payload.email.lower()
+    if email == settings.ADMIN_EMAIL.lower():
+        raise ConflictError("Không thể đăng ký tài khoản với email admin hệ thống")
     if get_user_by_email(db, email):
         raise ConflictError("Email đã được đăng ký")
 
-    user_count = db.query(User).count()
     user = User(
         id=str(uuid4()),
         email=email,
         full_name=payload.full_name.strip(),
         hashed_password=get_password_hash(payload.password),
-        role="admin" if user_count == 0 else "viewer",
+        role="viewer",
         is_active=True,
     )
+
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -211,6 +214,9 @@ def update_user_role(
     if not user:
         raise NotFoundError("Người dùng không tồn tại")
     
+    if user.email.lower() == settings.ADMIN_EMAIL.lower():
+        raise ConflictError("Không thể thay đổi quyền của tài khoản admin hệ thống")
+    
     user.role = payload.role
     db.commit()
     db.refresh(user)
@@ -237,6 +243,9 @@ def delete_user(
     if not user:
         raise NotFoundError("Người dùng không tồn tại")
     
+    if user.email.lower() == settings.ADMIN_EMAIL.lower():
+        raise ConflictError("Không thể xóa tài khoản admin hệ thống")
+    
     db.delete(user)
     db.commit()
     
@@ -261,6 +270,9 @@ def deactivate_user(
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise NotFoundError("Người dùng không tồn tại")
+    
+    if user.email.lower() == settings.ADMIN_EMAIL.lower():
+        raise ConflictError("Không thể vô hiệu hóa tài khoản admin hệ thống")
     
     user.is_active = False
     db.commit()

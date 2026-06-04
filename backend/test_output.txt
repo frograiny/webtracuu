@@ -1,2 +1,38 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.2, pytest-9.0.3, pluggy-1.6.0 -- D:\project\webtruong\venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\project\webtruong\backend
+plugins: anyio-4.12.1, locust-2.43.4
+collecting ... collected 6 items
 
-C:\Users\truon\AppData\Local\Programs\Python\Python311\python.exe: No module named pytest
+tests/test_auth.py::test_login PASSED                                    [ 16%]
+tests/test_auth.py::test_login_invalid PASSED                            [ 33%]
+tests/test_auth.py::test_list_users_pagination PASSED                    [ 50%]
+tests/test_auth.py::test_register_admin_email_rejected PASSED            [ 66%]
+tests/test_auth.py::test_register_regular_user_role PASSED               [ 83%]
+tests/test_auth.py::test_admin_user_modification_protection PASSED       [100%]
+
+============================== warnings summary ===============================
+app\core\config.py:5
+  D:\project\webtruong\backend\app\core\config.py:5: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Settings(BaseSettings):
+
+app\schemas\auth.py:22
+  D:\project\webtruong\backend\app\schemas\auth.py:22: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserRead(BaseModel):
+
+app\schemas\project.py:6
+  D:\project\webtruong\backend\app\schemas\project.py:6: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ProjectItem(BaseModel):
+
+app\schemas\project.py:39
+  D:\project\webtruong\backend\app\schemas\project.py:39: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    @validator("tenDeTai", "chuNhiem", "linhVuc")
+
+app\schemas\project.py:58
+  D:\project\webtruong\backend\app\schemas\project.py:58: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    @validator("tenDeTai", "chuNhiem", "linhVuc", pre=True)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 6 passed, 5 warnings in 1.82s ========================
+
