@@ -60,20 +60,20 @@
         <div class="slide-body">
           <div class="grid-2">
             <div class="card card-purple">
-              <div class="card-title" style="color: #f472b6;">Hạn chế của Hệ thống cũ</div>
+              <div class="card-title" style="color: #f472b6;">Hạn chế trong quản lý và truy vấn</div>
               <ul class="highlight-list" style="font-size: 0.9rem;">
-                <li><strong>Phân tán dữ liệu:</strong> Dữ liệu đề tài lưu trữ riêng lẻ ở các khoa/viện, không có kho trung tâm (Centralized Repository).</li>
-                <li><strong>Truy vấn thô:</strong> Sử dụng truy vấn `LIKE '%keyword%'` gây thắt cổ chai hiệu năng, thời gian quét toàn bảng tỷ lệ thuận với kích thước DB (độ phức tạp O(N)).</li>
-                <li><strong>Thiếu linh hoạt:</strong> Không hỗ trợ tìm kiếm không dấu, từ đồng nghĩa hoặc tự sửa lỗi chính tả.</li>
+                <li><strong>Dữ liệu phân tán:</strong> Các đề tài được lưu trữ cục bộ tại các khoa/viện, thiếu cơ sở dữ liệu tập trung (Centralized Repository) để quản lý đồng bộ.</li>
+                <li><strong>Hiệu năng truy vấn:</strong> Phương pháp so khớp chuỗi (`LIKE`) có độ phức tạp thời gian tăng tuyến tính theo kích thước dữ liệu ($O(N)$), gây hạn chế về hiệu năng khi quy mô dữ liệu lớn.</li>
+                <li><strong>Độ linh hoạt thấp:</strong> Chưa hỗ trợ tìm kiếm tiếng Việt không dấu, đối khớp từ đồng nghĩa hoặc xử lý lỗi chính tả trong truy vấn.</li>
               </ul>
             </div>
             
             <div class="card card-cyan">
-              <div class="card-title" style="color: var(--accent-cyan);">Hạ tầng & An ninh yếu</div>
+              <div class="card-title" style="color: var(--accent-cyan);">Hạn chế về hạ tầng và bảo mật</div>
               <ul class="highlight-list" style="font-size: 0.9rem;">
-                <li><strong>Thiếu khả năng mở rộng:</strong> Kiến trúc nguyên khối (Monolith) khó nâng cấp và không thể tự phân tải khi có lượng truy cập đột biến.</li>
-                <li><strong>Bảo mật lỏng lẻo:</strong> Session quản lý thủ công, thiếu cơ chế Blacklist token khi logout và không kiểm soát tần suất API (Rate Limiting).</li>
-                <li><strong>Thiếu đo lường:</strong> Không có cơ chế giám sát thời gian thực hoạt động hệ thống.</li>
+                <li><strong>Khả năng mở rộng:</strong> Kiến trúc nguyên khối (Monolithic architecture) gây khó khăn cho việc phân cấp tài nguyên và phân tải khi có lưu lượng truy cập cao đột xuất.</li>
+                <li><strong>Kiểm soát truy cập:</strong> Phiên làm việc quản lý thủ công, thiếu tính năng thu hồi token (token blacklisting) khi đăng xuất và chưa kiểm soát tần suất yêu cầu (Rate Limiting) trên các API.</li>
+                <li><strong>Khả năng giám sát:</strong> Chưa tích hợp công cụ thu thập chỉ số hiệu năng hệ thống theo thời gian thực (Monitoring).</li>
               </ul>
             </div>
           </div>
@@ -95,9 +95,9 @@
             <div class="card card-blue">
               <div class="card-title" style="color: var(--accent-blue);">Mục tiêu Nghiệp vụ & Kỹ thuật</div>
               <ul class="highlight-list" style="font-size: 0.9rem;">
-                <li><strong>Số hóa tập trung:</strong> Gom toàn bộ đề tài NCKH, luận văn, luận án về một nguồn lưu trữ duy nhất.</li>
-                <li><strong>Hiệu năng cực cao:</strong> Đạt thời gian trễ tìm kiếm (Search Latency) < 100ms trên tập dữ liệu lớn.</li>
-                <li><strong>Sẵn sàng cao:</strong> Đảm bảo hệ thống hoạt động liên tục 24/7 (Uptime 99.9%) nhờ tự phục hồi (Auto-healing).</li>
+                <li><strong>Lưu trữ tập trung:</strong> Số hóa và tích hợp toàn bộ thông tin đề tài NCKH, luận văn, luận án vào một hệ thống quản lý cơ sở dữ liệu duy nhất.</li>
+                <li><strong>Tối ưu hóa hiệu năng:</strong> Đảm bảo thời gian phản hồi truy vấn tìm kiếm (Search Latency) dưới 100ms trên tập dữ liệu quy mô lớn.</li>
+                <li><strong>Tính sẵn sàng cao:</strong> Đảm bảo tính ổn định của hệ thống thông qua việc cấu hình cơ chế tự động phục hồi dịch vụ (Auto-healing).</li>
               </ul>
             </div>
             
@@ -253,8 +253,8 @@
             <div class="card card-purple">
               <div class="card-title" style="color:var(--accent-purple);">Frontend & Backend Core</div>
               <ul class="highlight-list" style="font-size: 0.85rem;">
-                <li><strong>React + Vite + TS:</strong> Sử dụng DOM ảo phản hồi giao diện tức thì. TypeScript giảm 80% lỗi runtime nhờ ép kiểu dữ liệu chặt chẽ ở build-time.</li>
-                <li><strong>Python FastAPI:</strong> Cơ chế xử lý bất đồng bộ (Async ASGI) thông qua `uvloop` đạt hiệu năng xử lý request cao ngang ngửa Go/NodeJS.</li>
+                <li><strong>React + Vite + TS:</strong> Sử dụng cơ chế Virtual DOM giúp tối ưu hóa hiệu năng cập nhật giao diện. Khai báo kiểu tĩnh (TypeScript) hỗ trợ phát hiện lỗi dữ liệu từ giai đoạn biên dịch.</li>
+                <li><strong>Python FastAPI:</strong> Sử dụng khung làm việc bất đồng bộ (Asynchronous ASGI) dựa trên `uvloop` để nâng cao năng lực xử lý đồng thời các yêu cầu HTTP.</li>
               </ul>
             </div>
             
@@ -527,7 +527,7 @@
           </div>
         </div>
         <div class="slide-footer">
-          <div class="slide-footer-left">Cơ chế an toàn bảo mật chuẩn Enterprise doanh nghiệp</div>
+          <div class="slide-footer-left">Cơ chế xác thực và bảo mật hệ thống</div>
           <div class="slide-footer-right">Chương 5: Auth</div>
         </div>
       </section>
@@ -580,7 +580,7 @@
           </div>
         </div>
         <div class="slide-footer">
-          <div class="slide-footer-left">Giải thuật chống chiếm quyền điều khiển phiên bằng Redis Blacklist</div>
+          <div class="slide-footer-left">Thu hồi phiên làm việc thông qua cơ chế Redis Blacklist</div>
           <div class="slide-footer-right">Chương 5: Bảo mật</div>
         </div>
       </section>
@@ -612,7 +612,7 @@
           </div>
         </div>
         <div class="slide-footer">
-          <div class="slide-footer-left">Vận hành tự động và phát hiện lỗi tức thì</div>
+          <div class="slide-footer-left">Tự động hóa vận hành và giám sát hệ thống</div>
           <div class="slide-footer-right">Chương 5: DevOps</div>
         </div>
       </section>
@@ -628,9 +628,9 @@
             <div class="card card-green">
               <div class="card-title" style="color: var(--accent-green);">Kết Quả Đạt Được</div>
               <ul class="highlight-list" style="font-size: 0.9rem;">
-                <li><strong>Online ổn định:</strong> Chạy hoàn hảo trên máy chủ Khoa HUS và các cloud (Vercel & Render).</li>
-                <li><strong>Đạt chuẩn NFR:</strong> Tìm kiếm tức thì < 100ms, tự dọn dẹp cache, bảo mật đa lớp an toàn.</li>
-                <li><strong>Tủ sách tập trung:</strong> Gom dữ liệu khoa học về một hệ thống nhất, sẵn sàng bàn giao.</li>
+                <li><strong>Triển khai thực tế:</strong> Hệ thống hoạt động ổn định trên môi trường thử nghiệm và các nền tảng điện toán đám mây.</li>
+                <li><strong>Đáp ứng yêu cầu kỹ thuật:</strong> Đảm bảo thời gian phản hồi tìm kiếm dưới 100ms, tự động đồng bộ bộ đệm và thiết lập các lớp bảo mật cơ bản.</li>
+                <li><strong>Kho dữ liệu tập trung:</strong> Xây dựng thành công kho lưu trữ tập trung phục vụ công tác tra cứu tài liệu khoa học.</li>
               </ul>
             </div>
             
